@@ -10,9 +10,9 @@ import (
 	"github.com/yyle88/done"
 	"github.com/yyle88/mustdone"
 	"github.com/yyle88/mustdone/internal/utils"
+	"github.com/yyle88/syntaxgo/syntaxgo_ast"
+	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
 	"github.com/yyle88/zaplog"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_ast"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_ast/utils_golang_ast_fields"
 	"go.uber.org/zap"
 )
 
@@ -56,9 +56,9 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingTy
 
 		source := done.VAE(os.ReadFile(path)).Done()
 
-		astFile := done.VCE(utils_golang_ast.NewAstXSourceCode(path, source)).Nice()
-		astFns := utils_golang_ast.GetFunctions(astFile)
-		mebFunctions := utils_golang_ast.GetFuncsXRecvName(astFns, objectType.Name(), true)
+		astFile := done.VCE(syntaxgo_ast.NewAstFromSource(path, source)).Nice()
+		astFns := syntaxgo_ast.GetFunctions(astFile)
+		mebFunctions := syntaxgo_ast.GetFunctionsXRecvName(astFns, objectType.Name(), true)
 		if len(mebFunctions) == 0 {
 			continue
 		}
@@ -88,28 +88,28 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingTy
 		source := oneTmp.source
 		mebFunctions := oneTmp.mebFunctions
 		for _, mebFunc := range mebFunctions {
-			mebFuncName := utils_golang_ast.GetNodeString(source, mebFunc.Name)
+			mebFuncName := syntaxgo_ast.GetNodeCode(source, mebFunc.Name)
 			if utils.In(mebFuncName, []string{string(mustdone.MUST), string(mustdone.SOFT)}) {
 				continue
 			}
 
-			var params = make(utils_golang_ast_fields.NameTypeElements, 0)
+			var params = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Params != nil {
-				params = utils_golang_ast_fields.GetSimpleArgElements(mebFunc.Type.Params.List, source)
+				params = syntaxgo_astfieldsflat.GetSimpleArgElements(mebFunc.Type.Params.List, source)
 			}
-			var results = make(utils_golang_ast_fields.NameTypeElements, 0)
+			var results = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Results != nil {
-				results = utils_golang_ast_fields.GetSimpleResElements(mebFunc.Type.Results.List, source)
+				results = syntaxgo_astfieldsflat.GetSimpleResElements(mebFunc.Type.Results.List, source)
 			}
 
 			for _, elem := range results {
 				zaplog.LOG.Debug("elem", zap.String("name", elem.Name), zap.String("kind", elem.Kind))
 			}
 
-			var okxResElems = make(utils_golang_ast_fields.NameTypeElements, 0)
-			var erxResElems = make(utils_golang_ast_fields.NameTypeElements, 0)
+			var okxResElems = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
+			var erxResElems = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
 			for _, result := range results {
-				if utils_golang_ast.GetNodeString(source, result.Type) == "error" {
+				if syntaxgo_ast.GetNodeCode(source, result.Type) == "error" {
 					erxResElems = append(erxResElems, result)
 				} else {
 					okxResElems = append(okxResElems, result)
@@ -117,7 +117,7 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingTy
 			}
 
 			var erxHandleStmts []string
-			for _, erxElemName := range erxResElems.GetFuncParamsStats() {
+			for _, erxElemName := range erxResElems.GetFunctionParamsStats() {
 				className := cfg.FlexClass
 				if className == "" {
 					className = mustdone.GetPkgName()
@@ -126,17 +126,17 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingTy
 			}
 
 			ptx.Println(`func (T *` + subClassName + `) ` + mebFuncName + `(` +
-				params.GetNamesKindsStats().Merge() +
+				params.GetNamesKindsStats().MergeParts() +
 				`)` + `(` +
-				okxResElems.GetNamesKindsStats().Merge() +
+				okxResElems.GetNamesKindsStats().MergeParts() +
 				`) {`)
 
-			runFuncLine := `T.` + cfg.OptRecvName + `.` + mebFuncName + `(` + params.GetFuncParamsStats().Merge() + `)`
+			runFuncLine := `T.` + cfg.OptRecvName + `.` + mebFuncName + `(` + params.GetFunctionParamsStats().MergeParts() + `)`
 			if len(results) > 0 {
 				if len(okxResElems) == len(results) {
-					ptx.Println(results.GetFuncParamsStats().Merge() + "=" + runFuncLine)
+					ptx.Println(results.GetFunctionParamsStats().MergeParts() + "=" + runFuncLine)
 				} else {
-					ptx.Println(results.GetFuncParamsStats().Merge() + ":=" + runFuncLine)
+					ptx.Println(results.GetFunctionParamsStats().MergeParts() + ":=" + runFuncLine)
 				}
 			} else {
 				ptx.Println(runFuncLine)
@@ -147,7 +147,7 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingTy
 			}
 
 			if len(okxResElems) > 0 {
-				ptx.Println("return" + " " + okxResElems.GetFuncParamsStats().Merge())
+				ptx.Println("return" + " " + okxResElems.GetFunctionParamsStats().MergeParts())
 			}
 
 			ptx.Println("}")

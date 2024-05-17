@@ -5,7 +5,7 @@ go 1.22.3
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/yyle88/done v1.0.0
-	github.com/yyle88/syntaxgo v0.0.0
+	github.com/yyle88/syntaxgo v0.0.2
 	github.com/yyle88/zaplog v0.0.2
 	gitlab.yyle.com/golang/uvyyle.git v0.0.0-20240517000844-39cd24814c93
 	go.uber.org/zap v1.27.0

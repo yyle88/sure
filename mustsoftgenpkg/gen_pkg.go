@@ -12,8 +12,8 @@ import (
 	"github.com/yyle88/done"
 	"github.com/yyle88/mustdone"
 	"github.com/yyle88/mustdone/internal/utils"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_ast"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_ast/utils_golang_ast_fields"
+	"github.com/yyle88/syntaxgo/syntaxgo_ast"
+	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_fmt"
 )
 
@@ -56,12 +56,12 @@ func WriteOneFlex(
 		absPath := filepath.Join(absPackagePath, name)
 		srcData := done.VAE(os.ReadFile(absPath)).Done()
 
-		astFile, err := utils_golang_ast.NewAstXFilepath(absPath)
+		astFile, err := syntaxgo_ast.NewAstXFilepath(absPath)
 		done.Done(err)
 
 		packageName := astFile.Name.Name
 
-		astFns := utils_golang_ast.GetFunctions(astFile)
+		astFns := syntaxgo_ast.GetFunctions(astFile)
 
 		var sliceFuncCodes []string
 		for _, astFunc := range astFns {
@@ -107,7 +107,7 @@ func WriteOneFlex(
 func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleType mustdone.FlexibleHandlingType, flexUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
-		res += utils_golang_ast.GetNodeString(srcData, astFunc.Type.TypeParams)
+		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)
 	}
 	res += "("
 	var argList []string
@@ -116,10 +116,10 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 		for _, param := range astFunc.Type.Params.List {
 			if len(param.Names) == 0 {
 				argName := "arg" + strconv.Itoa(len(args))
-				args = append(args, argName+" "+utils_golang_ast.GetNodeString(srcData, param.Type))
+				args = append(args, argName+" "+syntaxgo_ast.GetNodeCode(srcData, param.Type))
 				argList = append(argList, argName)
 			} else {
-				args = append(args, utils_golang_ast.GetNodeString(srcData, param))
+				args = append(args, syntaxgo_ast.GetNodeCode(srcData, param))
 				for _, name := range param.Names {
 					// 检查参数是否是 "..."
 					if _, variadic := param.Type.(*ast.Ellipsis); variadic {
@@ -134,7 +134,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	}
 	res += ")"
 
-	genericsMap := utils_golang_ast_fields.CountGenericsMap(astFunc.Type.TypeParams)
+	genericsMap := syntaxgo_astfieldsflat.CountGenericsMap(astFunc.Type.TypeParams)
 
 	var isReturnErrors = false
 	{
@@ -246,7 +246,7 @@ func parseResults(srcData []byte, astFunc *ast.FuncDecl) ([]*retType, bool) {
 	} else {
 		var errNum int
 		for _, x := range astFunc.Type.Results.List {
-			resType := utils_golang_ast.GetNodeString(srcData, x.Type)
+			resType := syntaxgo_ast.GetNodeCode(srcData, x.Type)
 			eIs := bool(resType == "error")
 			if len(x.Names) == 0 {
 				var resName string
