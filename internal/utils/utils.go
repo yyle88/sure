@@ -67,6 +67,10 @@ func MustWriteToPath(path string, s string) {
 	done.Done(os.WriteFile(path, []byte(s), 0644))
 }
 
+func WriteFile(path string, data []byte) error {
+	return os.WriteFile(path, data, 0644)
+}
+
 func MustLsFileNames(root string) (names []string) {
 	infos := done.VAE(os.ReadDir(root)).Done()
 	names = make([]string, 0, len(infos))

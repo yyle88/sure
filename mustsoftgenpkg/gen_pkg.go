@@ -10,11 +10,11 @@ import (
 	"testing"
 
 	"github.com/yyle88/done"
+	"github.com/yyle88/formatgo"
 	"github.com/yyle88/mustdone"
 	"github.com/yyle88/mustdone/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_fmt"
 )
 
 func WriteGenFlex(
@@ -99,7 +99,10 @@ func WriteOneFlex(
 
 			newName := strings.Replace(name, ".go", "_"+shortFlexName+".go", 1)
 			newPath := filepath.Join(writeToAbsRoot, newPackageName, newName)
-			utils.MustWriteToPath(newPath, utils_golang_fmt.MustSource(ptx.String()))
+
+			newCode, _ := formatgo.FormatCode(ptx.String())
+
+			utils.MustWriteToPath(newPath, newCode)
 		}
 	}
 }

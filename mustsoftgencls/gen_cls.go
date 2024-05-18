@@ -162,11 +162,13 @@ type StyleType string
 
 //goland:noinspection GoSnakeCaseUsage
 const (
-	STYLE_PREFIX_LOWER_TYPE     StyleType = "STYLE_PREFIX_LOWER_TYPE"
-	STYLE_PREFIX_UPPER_TYPE     StyleType = "STYLE_PREFIX_UPPER_TYPE"
+	STYLE_PREFIX_LOWER_TYPE StyleType = "STYLE_PREFIX_LOWER_TYPE"
+	STYLE_SUFFIX_LOWER_TYPE StyleType = "STYLE_SUFFIX_LOWER_TYPE"
+
+	STYLE_PREFIX_UPPER_TYPE StyleType = "STYLE_PREFIX_UPPER_TYPE"
+	STYLE_SUFFIX_UPPER_TYPE StyleType = "STYLE_SUFFIX_UPPER_TYPE"
+
 	STYLE_PREFIX_CAMELCASE_TYPE StyleType = "STYLE_PREFIX_CAMELCASE_TYPE"
-	STYLE_SUFFIX_LOWER_TYPE     StyleType = "STYLE_SUFFIX_LOWER_TYPE"
-	STYLE_SUFFIX_UPPER_TYPE     StyleType = "STYLE_SUFFIX_UPPER_TYPE"
 	STYLE_SUFFIX_CAMELCASE_TYPE StyleType = "STYLE_SUFFIX_CAMELCASE_TYPE"
 )
 
@@ -174,14 +176,16 @@ func makeNewTypeName(objectType reflect.Type, cfg *GenParam, flexibleType mustdo
 	switch cfg.SubClassNameStyleType {
 	case STYLE_PREFIX_LOWER_TYPE:
 		return strings.ToLower(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_PREFIX_UPPER_TYPE:
-		return strings.ToUpper(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_PREFIX_CAMELCASE_TYPE:
-		return string(flexibleType) + cfg.SubClassNamePartWords + objectType.Name()
 	case STYLE_SUFFIX_LOWER_TYPE:
 		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToLower(string(flexibleType))
+
+	case STYLE_PREFIX_UPPER_TYPE:
+		return strings.ToUpper(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()
 	case STYLE_SUFFIX_UPPER_TYPE:
 		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToUpper(string(flexibleType))
+
+	case STYLE_PREFIX_CAMELCASE_TYPE:
+		return string(flexibleType) + cfg.SubClassNamePartWords + objectType.Name()
 	case STYLE_SUFFIX_CAMELCASE_TYPE:
 		return objectType.Name() + cfg.SubClassNamePartWords + string(flexibleType)
 	}
