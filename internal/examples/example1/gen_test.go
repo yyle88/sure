@@ -30,13 +30,14 @@ func TestGenCode(t *testing.T) {
 	ptx.Println(mustsoft_gen_cls.GenCodes(Example{}, param, mustdone.MUST, mustdone.SOFT))
 
 	//很明显，当主动写 import 的时候，执行的 format 的速度特别快
-	source := syntaxgo_ast.AddImports(ptx.Bytes(), &syntaxgo_ast.PackageImportOptions{
+	packageImportOptions := &syntaxgo_ast.PackageImportOptions{
 		Packages:   nil,
 		UsingTypes: nil,
 		Objects: []any{
-			syntaxgo_reflect.GetObject[mustdone.FlexibleHandlingType](),
+			syntaxgo_reflect.GetObject[mustdone.FlexibleEnum](),
 		},
-	})
+	}
+	source := syntaxgo_ast.AddImports(ptx.Bytes(), packageImportOptions)
 	//假如你不在写文件的时候 format，代码格式就不美观，而执行 format 时，最后确保它不再去找包名，因为当项目过大时找包名会变得很困难的
 	newSource, err := formatgo.FormatBytes(source)
 	require.NoError(t, err)

@@ -24,7 +24,7 @@ type GenParam struct {
 	FlexClass             string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
 }
 
-func GenCodes(object any, cfg *GenParam, flexibleTypes ...mustdone.FlexibleHandlingType) string {
+func GenCodes(object any, cfg *GenParam, flexibleTypes ...mustdone.FlexibleEnum) string {
 	ptx := utils.NewPTX()
 	for _, flexibleType := range flexibleTypes {
 		subClassName := makeNewTypeName(reflect.TypeOf(object), cfg, flexibleType)
@@ -33,7 +33,7 @@ func GenCodes(object any, cfg *GenParam, flexibleTypes ...mustdone.FlexibleHandl
 	return ptx.String()
 }
 
-func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingType, subClassName string) string {
+func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subClassName string) string {
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
@@ -172,7 +172,7 @@ const (
 	STYLE_SUFFIX_CAMELCASE_TYPE StyleType = "STYLE_SUFFIX_CAMELCASE_TYPE"
 )
 
-func makeNewTypeName(objectType reflect.Type, cfg *GenParam, flexibleType mustdone.FlexibleHandlingType) string {
+func makeNewTypeName(objectType reflect.Type, cfg *GenParam, flexibleType mustdone.FlexibleEnum) string {
 	switch cfg.SubClassNameStyleType {
 	case STYLE_PREFIX_LOWER_TYPE:
 		return strings.ToLower(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()

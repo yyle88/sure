@@ -71,7 +71,7 @@ func WriteFile(path string, data []byte) error {
 	return os.WriteFile(path, data, 0644)
 }
 
-func MustLsFileNames(root string) (names []string) {
+func MustLs(root string) (names []string) {
 	infos := done.VAE(os.ReadDir(root)).Done()
 	names = make([]string, 0, len(infos))
 	for _, info := range infos {

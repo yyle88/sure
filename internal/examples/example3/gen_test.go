@@ -15,7 +15,7 @@ func TestGen(t *testing.T) {
 	pkgPath := syntaxgo_reflect.GetPkgPathV2[ObjectType]()
 
 	//选择生成 soft 软包
-	mustsoft_gen_pkg.WriteGenFlex(t, runpath.PARENT.Path(), mustdone.SOFT, pkgPath)
+	mustsoft_gen_pkg.Gen(t, runpath.PARENT.Path(), mustdone.SOFT, pkgPath)
 	//选择生成 must 硬包
-	mustsoft_gen_pkg.WriteGenFlex(t, runpath.PARENT.Path(), mustdone.MUST, pkgPath)
+	mustsoft_gen_pkg.Gen(t, runpath.PARENT.Path(), mustdone.MUST, pkgPath)
 }

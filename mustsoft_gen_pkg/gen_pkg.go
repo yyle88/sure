@@ -17,43 +17,42 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
 )
 
-func WriteGenFlex(
+func Gen(
 	t *testing.T,
 	pkgRoot string,
-	flexibleType mustdone.FlexibleHandlingType,
+	argEnum mustdone.FlexibleEnum,
 	pkgPath string,
 ) {
-	WriteOneFlex(
+	GenerateFlexiblePackage(
 		t,
 		pkgRoot,
 		pkgRoot,
-		flexibleType,
+		argEnum,
 		pkgPath,
 		mustdone.GetPkgPath(),
 		mustdone.GetPkgName(),
 	)
 }
 
-func WriteOneFlex(
+func GenerateFlexiblePackage(
 	t *testing.T,
-	absPackagePath string,
-	writeToAbsRoot string,
-	flexibleType mustdone.FlexibleHandlingType,
+	pkgRoot string,
+	genRoot string,
+	argEnum mustdone.FlexibleEnum,
 	pkgPath string,
 	flexPkgPath string,
 	flexUseNode string,
 ) {
-	fmt.Println(absPackagePath, writeToAbsRoot)
+	fmt.Println(pkgRoot, genRoot)
 
-	names := utils.MustLsFileNames(absPackagePath)
-	for _, name := range names {
+	for _, name := range utils.MustLs(pkgRoot) {
 		if !strings.HasSuffix(name, ".go") {
 			continue
 		}
 		if strings.HasSuffix(name, "_test.go") {
 			continue
 		}
-		absPath := filepath.Join(absPackagePath, name)
+		absPath := filepath.Join(pkgRoot, name)
 		srcData := done.VAE(os.ReadFile(absPath)).Done()
 
 		astFile, err := syntaxgo_ast.NewAstXFilepath(absPath)
@@ -78,14 +77,14 @@ func WriteOneFlex(
 			results, anonymous := parseResults(srcData, astFunc)
 			t.Log(utils.NeatString(results))
 
-			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, flexibleType, flexUseNode)
+			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, argEnum, flexUseNode)
 			t.Log(sFuncCode)
 
 			sliceFuncCodes = append(sliceFuncCodes, sFuncCode)
 		}
 
 		if len(sliceFuncCodes) > 0 {
-			var shortFlexName = strings.ToLower(string(flexibleType))
+			var shortFlexName = strings.ToLower(string(argEnum))
 
 			newPackageName := packageName + "_" + shortFlexName
 
@@ -98,7 +97,7 @@ func WriteOneFlex(
 			ptx.Println(strings.Join(sliceFuncCodes, "\n"))
 
 			newName := strings.Replace(name, ".go", "_"+shortFlexName+".go", 1)
-			newPath := filepath.Join(writeToAbsRoot, newPackageName, newName)
+			newPath := filepath.Join(genRoot, newPackageName, newName)
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
 
@@ -107,7 +106,7 @@ func WriteOneFlex(
 	}
 }
 
-func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleType mustdone.FlexibleHandlingType, flexUseNode string) string {
+func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleType mustdone.FlexibleEnum, flexUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
 		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)
