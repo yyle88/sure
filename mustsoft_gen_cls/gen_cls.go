@@ -1,4 +1,4 @@
-package mustsoftgencls
+package mustsoft_gen_cls
 
 import (
 	"go/ast"
@@ -56,7 +56,7 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleHandlingTy
 
 		source := done.VAE(os.ReadFile(path)).Done()
 
-		astFile := done.VCE(syntaxgo_ast.NewAstFromSource(path, source)).Nice()
+		astFile := done.VCE(syntaxgo_ast.NewAstFromSource(source)).Nice()
 		astFns := syntaxgo_ast.GetFunctions(astFile)
 		mebFunctions := syntaxgo_ast.GetFunctionsXRecvName(astFns, objectType.Name(), true)
 		if len(mebFunctions) == 0 {

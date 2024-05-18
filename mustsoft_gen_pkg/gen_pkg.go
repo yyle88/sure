@@ -1,4 +1,4 @@
-package mustsoftgenpkg
+package mustsoft_gen_pkg
 
 import (
 	"fmt"

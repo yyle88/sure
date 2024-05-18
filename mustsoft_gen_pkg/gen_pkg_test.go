@@ -1,4 +1,4 @@
-package mustsoftgencls
+package mustsoft_gen_pkg
 
 import (
 	"testing"

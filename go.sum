@@ -16,8 +16,8 @@ github.com/yyle88/mutexmap v1.0.1 h1:DvqDlo83kLgxTdoj/qgqa/OoARpICIbFhUvQfrVBUXI
 github.com/yyle88/mutexmap v1.0.1/go.mod h1:xUqVmNE2/y4AMz5a8O3a4ik9Ua5xskEaLQ+ICnAAl8E=
 github.com/yyle88/runpath v1.0.3 h1:KE+MrWOC92I2PGhd/myhomNVkANiKseI8CrMBVWuc4A=
 github.com/yyle88/runpath v1.0.3/go.mod h1:QtfOHJKQw9ou1mWM21MPM5B/GOzYnDw768fwz03rLnE=
-github.com/yyle88/syntaxgo v0.0.3 h1:3FxD/+iQiBCu5ZBNbICF3R5ASShgdohdcln0K3rEx9U=
-github.com/yyle88/syntaxgo v0.0.3/go.mod h1:gBn/WwLimmFQjYghsBFHrRwdUBDsqDvspiGP+bvVh04=
+github.com/yyle88/syntaxgo v0.0.6 h1:sILVD9gyopS2uUn/O5bDRwOH8Lu/AVWV34OqfK6INuE=
+github.com/yyle88/syntaxgo v0.0.6/go.mod h1:gBn/WwLimmFQjYghsBFHrRwdUBDsqDvspiGP+bvVh04=
 github.com/yyle88/zaplog v0.0.2 h1:GbkEzLdfxcZkYvu/ZaxFrfMgnUqrziC27MQfRDoUJik=
 github.com/yyle88/zaplog v0.0.2/go.mod h1:dHCzCShQ1ZTy2KjI9Ti0h9bn7urZOYJbAFc7AHCVev4=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=

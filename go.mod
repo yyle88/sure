@@ -8,7 +8,7 @@ require (
 	github.com/yyle88/done v1.0.0
 	github.com/yyle88/formatgo v1.0.0
 	github.com/yyle88/runpath v1.0.3
-	github.com/yyle88/syntaxgo v0.0.3
+	github.com/yyle88/syntaxgo v0.0.6
 	github.com/yyle88/zaplog v0.0.2
 	go.uber.org/zap v1.27.0
 )
