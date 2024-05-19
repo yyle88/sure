@@ -28,6 +28,7 @@ type GenParam struct {
 	SubClassNameStyleEnum StyleEnum //非必填参数，你要生成的新子类型的命名风格，有默认风格
 	OptRecvName           string    //默认不填，你要解析的类型它的成员函数的recv的名称，比如 func (a *A)do() 就填写 a 就行
 	FlexibleClass         string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
+	FlexibleEnums         []mustdone.FlexibleEnum
 }
 
 func NewGenParam(srcRoot string) *GenParam {
@@ -52,6 +53,27 @@ func (cfg *GenParam) SetSubClassNameStyleEnum(subClassNameStyleType StyleEnum) *
 func (cfg *GenParam) SetOptRecvName(optRecvName string) *GenParam {
 	cfg.OptRecvName = optRecvName
 	return cfg
+}
+
+func (cfg *GenParam) SetFlexibleClass(flexibleClass string) *GenParam {
+	cfg.FlexibleClass = flexibleClass
+	return cfg
+}
+
+func (cfg *GenParam) SetFlexibleEnum(flexibleEnum mustdone.FlexibleEnum) *GenParam {
+	cfg.FlexibleEnums = append(cfg.FlexibleEnums, flexibleEnum)
+	return cfg
+}
+
+func (cfg *GenParam) GetFlexibleEnums() []mustdone.FlexibleEnum {
+	if len(cfg.FlexibleEnums) != 0 {
+		return cfg.FlexibleEnums
+	} else {
+		return []mustdone.FlexibleEnum{
+			mustdone.MUST,
+			mustdone.SOFT,
+		}
+	}
 }
 
 func (cfg *GenParam) makeClassName(objectType reflect.Type, flexibleEnum mustdone.FlexibleEnum) string {

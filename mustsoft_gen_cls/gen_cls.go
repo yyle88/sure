@@ -63,10 +63,7 @@ func Gen(cfg *Config, objects ...interface{}) {
 
 func GenerateFlexibleClassCode(cfg *GenParam, object interface{}) string {
 	ptx := utils.NewPTX()
-	for _, flexibleEnum := range []mustdone.FlexibleEnum{
-		mustdone.MUST,
-		mustdone.SOFT,
-	} {
+	for _, flexibleEnum := range cfg.GetFlexibleEnums() {
 		ptx.Println(GenerateFlexibleClassOnce(cfg, object, flexibleEnum))
 	}
 	return ptx.String()
