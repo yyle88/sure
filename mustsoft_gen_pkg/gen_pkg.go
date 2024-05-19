@@ -29,8 +29,8 @@ func Gen(
 		pkgRoot,
 		argEnum,
 		pkgPath,
-		mustdone.GetPkgPath(),
-		mustdone.GetPkgName(),
+		mustdone.GetPkgPath(), //默认用这个包 "github.com/yyle88/mustdone"
+		mustdone.GetPkgName(), //默认使用 "mustdone" 调用软硬函数，比如 mustdone.Must(err) 和 mustdone.Soft(err) 因此很明显假如你有自己实现Must和Soft的话也可以用自己的
 	)
 }
 

@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func GenCodes(object any, cfg *GenParam, flexibleEnums ...mustdone.FlexibleEnum) string {
+func Gen(cfg *GenParam, object any, flexibleEnums ...mustdone.FlexibleEnum) string {
 	ptx := utils.NewPTX()
 	for _, flexibleEnum := range flexibleEnums {
 		ptx.Println(GenerateFlexibleClassCode(cfg, object, flexibleEnum))
