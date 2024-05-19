@@ -101,7 +101,7 @@ func GenerateFlexiblePackage(
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
 
-			utils.MustWriteToPath(newPath, newCode)
+			utils.MustWriteFileToPath(newPath, newCode)
 		}
 	}
 }

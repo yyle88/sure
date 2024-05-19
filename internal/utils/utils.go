@@ -62,7 +62,7 @@ func RootMustIsExist(root string) bool {
 	return !os.IsNotExist(err) && info != nil && info.IsDir()
 }
 
-func MustWriteToPath(path string, s string) {
+func MustWriteFileToPath(path string, s string) {
 	done.Done(os.MkdirAll(filepath.Dir(path), 0755))
 	done.Done(os.WriteFile(path, []byte(s), 0644))
 }

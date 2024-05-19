@@ -9,6 +9,7 @@ import (
 	"github.com/yyle88/mustdone/internal/examples/example2/example2_soft"
 	"github.com/yyle88/mustdone/internal/examples/example3/example3_must"
 	"github.com/yyle88/mustdone/internal/examples/example3/example3_soft"
+	"github.com/yyle88/mustdone/internal/examples/example4"
 )
 
 func TestExample1(t *testing.T) {
@@ -53,4 +54,27 @@ func TestExample3(t *testing.T) {
 		require.NotNil(t, resX) //这块是需要判读的，毕竟是soft的，仅仅是忽略错误发出告警但流程继续执行
 		require.Equal(t, "haha", resX.Name)
 	}
+}
+
+func TestExample4(t *testing.T) {
+	//当你要操作的是个对象时，你就可以赋予这个对象 Must 和 Soft 的能力，Must表示出错时崩溃，而Soft表示出错是仅仅告警但流程继续
+	a := example4.NewExample(1, "s")
+	ma := a.Must()
+	sa := a.Soft()
+
+	t.Log(ma.GetN())
+	t.Log(ma.GetS())
+
+	t.Log(sa.GetN())
+	t.Log(sa.GetS())
+
+	b := example4.NewExample(1, "s")
+	mb := b.Must()
+	sb := b.Soft()
+
+	t.Log(mb.GetN())
+	t.Log(mb.GetS())
+
+	t.Log(sb.GetN())
+	t.Log(sb.GetS())
 }
