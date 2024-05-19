@@ -74,7 +74,7 @@ func GenerateFlexiblePackage(
 			if !utils.C0IsUpperString(astFunc.Name.Name) {
 				continue
 			}
-			results, anonymous := parseResults(srcData, astFunc)
+			results, anonymous := parseResFields(srcData, astFunc)
 			t.Log(utils.NeatString(results))
 
 			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, argEnum, flexUseNode)
@@ -240,15 +240,15 @@ type retType struct {
 	Type string
 }
 
-func parseResults(srcData []byte, astFunc *ast.FuncDecl) ([]*retType, bool) {
+func parseResFields(source []byte, astFunction *ast.FuncDecl) ([]*retType, bool) {
 	var results []*retType
 	var anonymous = true
-	if astFunc.Type.Results == nil || len(astFunc.Type.Results.List) == 0 {
+	if astFunction.Type.Results == nil || len(astFunction.Type.Results.List) == 0 {
 		results = make([]*retType, 0)
 	} else {
 		var errNum int
-		for _, x := range astFunc.Type.Results.List {
-			resType := syntaxgo_ast.GetNodeCode(srcData, x.Type)
+		for _, x := range astFunction.Type.Results.List {
+			resType := syntaxgo_ast.GetNodeCode(source, x.Type)
 			eIs := bool(resType == "error")
 			if len(x.Names) == 0 {
 				var resName string

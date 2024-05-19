@@ -16,24 +16,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type GenParam struct {
-	SourceCodeRootPath    string    //必填参数，你要解析的类型所在源代码的目录
-	OptRecvName           string    //默认不填，你要解析的类型它的成员函数的recv的名称，比如 func (a *A)do() 就填写 a 就行
-	SubClassNameStyleType StyleType //非必填参数，你要生成的新子类型的命名风格，有默认风格
-	SubClassNamePartWords string    //非必填参数，你要生成的新子类型的名称片段，就是这个名称字符串中间，有部分可以自定义的内容
-	FlexClass             string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
-}
-
 func GenCodes(object any, cfg *GenParam, flexibleTypes ...mustdone.FlexibleEnum) string {
 	ptx := utils.NewPTX()
 	for _, flexibleType := range flexibleTypes {
-		subClassName := makeNewTypeName(reflect.TypeOf(object), cfg, flexibleType)
-		ptx.Println(GenCode(object, cfg, flexibleType, subClassName))
+		ptx.Println(GenerateFlexibleClassCode(cfg, object, flexibleType))
 	}
 	return ptx.String()
 }
 
-func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subClassName string) string {
+func GenerateFlexibleClassCode(cfg *GenParam, object any, flexibleType mustdone.FlexibleEnum) string {
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
@@ -43,7 +34,7 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subC
 
 	utils.BooleanOK(flexibleType == mustdone.MUST || flexibleType == mustdone.SOFT)
 
-	var astTuples = make(astSrcTmpTuples, 0)
+	var astTuples = make(srcFnsTuples, 0)
 	for _, subInfo := range done.VAE(os.ReadDir(cfg.SourceCodeRootPath)).Done() {
 		if subInfo.IsDir() {
 			continue
@@ -63,9 +54,9 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subC
 			continue
 		}
 
-		astTuples = append(astTuples, &astSrcTmpTuple{
-			source:       source,
-			mebFunctions: mebFunctions,
+		astTuples = append(astTuples, &srcFnsTuple{
+			srcCode: source,
+			methods: mebFunctions,
 		})
 	}
 
@@ -73,9 +64,7 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subC
 		cfg.OptRecvName = utils.SOrX(astTuples.GetRecvName(), "T")
 	}
 
-	if subClassName == "" {
-		subClassName = makeNewTypeName(reflect.TypeOf(object), cfg, flexibleType)
-	}
+	subClassName := cfg.makeClassName(reflect.TypeOf(object), flexibleType)
 
 	ptx := utils.NewPTX()
 	ptx.Println(`type ` + subClassName + ` struct{` + cfg.OptRecvName + ` *` + objectType.Name() + `}`)
@@ -85,8 +74,8 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subC
 	}`)
 
 	for _, oneTmp := range astTuples {
-		source := oneTmp.source
-		mebFunctions := oneTmp.mebFunctions
+		source := oneTmp.srcCode
+		mebFunctions := oneTmp.methods
 		for _, mebFunc := range mebFunctions {
 			mebFuncName := syntaxgo_ast.GetNodeCode(source, mebFunc.Name)
 			if utils.In(mebFuncName, []string{string(mustdone.MUST), string(mustdone.SOFT)}) {
@@ -158,50 +147,16 @@ func GenCode(object any, cfg *GenParam, flexibleType mustdone.FlexibleEnum, subC
 	return res
 }
 
-type StyleType string
-
-//goland:noinspection GoSnakeCaseUsage
-const (
-	STYLE_PREFIX_LOWER_TYPE StyleType = "STYLE_PREFIX_LOWER_TYPE"
-	STYLE_SUFFIX_LOWER_TYPE StyleType = "STYLE_SUFFIX_LOWER_TYPE"
-
-	STYLE_PREFIX_UPPER_TYPE StyleType = "STYLE_PREFIX_UPPER_TYPE"
-	STYLE_SUFFIX_UPPER_TYPE StyleType = "STYLE_SUFFIX_UPPER_TYPE"
-
-	STYLE_PREFIX_CAMELCASE_TYPE StyleType = "STYLE_PREFIX_CAMELCASE_TYPE"
-	STYLE_SUFFIX_CAMELCASE_TYPE StyleType = "STYLE_SUFFIX_CAMELCASE_TYPE"
-)
-
-func makeNewTypeName(objectType reflect.Type, cfg *GenParam, flexibleType mustdone.FlexibleEnum) string {
-	switch cfg.SubClassNameStyleType {
-	case STYLE_PREFIX_LOWER_TYPE:
-		return strings.ToLower(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_SUFFIX_LOWER_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToLower(string(flexibleType))
-
-	case STYLE_PREFIX_UPPER_TYPE:
-		return strings.ToUpper(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_SUFFIX_UPPER_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToUpper(string(flexibleType))
-
-	case STYLE_PREFIX_CAMELCASE_TYPE:
-		return string(flexibleType) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_SUFFIX_CAMELCASE_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + string(flexibleType)
-	}
-	return strings.ToLower(string(flexibleType)) + cfg.SubClassNamePartWords + objectType.Name()
+type srcFnsTuple struct {
+	srcCode []byte
+	methods []*ast.FuncDecl
 }
 
-type astSrcTmpTuple struct {
-	mebFunctions []*ast.FuncDecl
-	source       []byte
-}
+type srcFnsTuples []*srcFnsTuple
 
-type astSrcTmpTuples []*astSrcTmpTuple
-
-func (astTuples astSrcTmpTuples) GetRecvName() string {
-	for _, oneTmp := range astTuples {
-		for _, mebFunction := range oneTmp.mebFunctions {
+func (vs srcFnsTuples) GetRecvName() string {
+	for _, oneTmp := range vs {
+		for _, mebFunction := range oneTmp.methods {
 			if mebFunction.Recv == nil {
 				continue
 			}
