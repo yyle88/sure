@@ -16,33 +16,33 @@ import (
 	"go.uber.org/zap"
 )
 
-func GenCodes(object any, cfg *GenParam, flexibleTypes ...mustdone.FlexibleEnum) string {
+func GenCodes(object any, cfg *GenParam, flexibleEnums ...mustdone.FlexibleEnum) string {
 	ptx := utils.NewPTX()
-	for _, flexibleType := range flexibleTypes {
-		ptx.Println(GenerateFlexibleClassCode(cfg, object, flexibleType))
+	for _, flexibleEnum := range flexibleEnums {
+		ptx.Println(GenerateFlexibleClassCode(cfg, object, flexibleEnum))
 	}
 	return ptx.String()
 }
 
-func GenerateFlexibleClassCode(cfg *GenParam, object any, flexibleType mustdone.FlexibleEnum) string {
+func GenerateFlexibleClassCode(cfg *GenParam, object any, flexibleEnum mustdone.FlexibleEnum) string {
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.PkgPath()))
 
-	utils.RootMustIsExist(cfg.SourceCodeRootPath)
+	utils.RootMustIsExist(cfg.SrcRoot)
 
-	utils.BooleanOK(flexibleType == mustdone.MUST || flexibleType == mustdone.SOFT)
+	utils.BooleanOK(flexibleEnum == mustdone.MUST || flexibleEnum == mustdone.SOFT)
 
 	var astTuples = make(srcFnsTuples, 0)
-	for _, subInfo := range done.VAE(os.ReadDir(cfg.SourceCodeRootPath)).Done() {
+	for _, subInfo := range done.VAE(os.ReadDir(cfg.SrcRoot)).Done() {
 		if subInfo.IsDir() {
 			continue
 		}
 		if !strings.HasSuffix(subInfo.Name(), ".go") {
 			continue
 		}
-		path := filepath.Join(cfg.SourceCodeRootPath, subInfo.Name())
+		path := filepath.Join(cfg.SrcRoot, subInfo.Name())
 		zaplog.LOG.Debug(path)
 
 		source := done.VAE(os.ReadFile(path)).Done()
@@ -64,12 +64,12 @@ func GenerateFlexibleClassCode(cfg *GenParam, object any, flexibleType mustdone.
 		cfg.OptRecvName = utils.SOrX(astTuples.GetRecvName(), "T")
 	}
 
-	subClassName := cfg.makeClassName(reflect.TypeOf(object), flexibleType)
+	subClassName := cfg.makeClassName(reflect.TypeOf(object), flexibleEnum)
 
 	ptx := utils.NewPTX()
 	ptx.Println(`type ` + subClassName + ` struct{` + cfg.OptRecvName + ` *` + objectType.Name() + `}`)
 	ptx.Println(`
-		func(` + cfg.OptRecvName + ` *` + objectType.Name() + `) ` + string(flexibleType) + `() * ` + subClassName + `{
+		func(` + cfg.OptRecvName + ` *` + objectType.Name() + `) ` + string(flexibleEnum) + `() * ` + subClassName + `{
 		return & ` + subClassName + `{` + cfg.OptRecvName + `:` + cfg.OptRecvName + `}
 	}`)
 
@@ -111,7 +111,7 @@ func GenerateFlexibleClassCode(cfg *GenParam, object any, flexibleType mustdone.
 				if className == "" {
 					className = mustdone.GetPkgName()
 				}
-				erxHandleStmts = append(erxHandleStmts, className+"."+string(flexibleType)+"("+erxElemName+")")
+				erxHandleStmts = append(erxHandleStmts, className+"."+string(flexibleEnum)+"("+erxElemName+")")
 			}
 
 			ptx.Println(`func (T *` + subClassName + `) ` + mebFuncName + `(` +

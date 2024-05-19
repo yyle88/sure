@@ -106,7 +106,7 @@ func GenerateFlexiblePackage(
 	}
 }
 
-func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleType mustdone.FlexibleEnum, flexUseNode string) string {
+func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleEnum mustdone.FlexibleEnum, flexUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
 		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)
@@ -195,7 +195,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	if len(results) > 0 {
 		for _, x := range results {
 			if x.Type == "error" {
-				res += flexUseNode + "." + string(flexibleType) + "(" + x.Name + ")" + "\n"
+				res += flexUseNode + "." + string(flexibleEnum) + "(" + x.Name + ")" + "\n"
 			}
 		}
 	}

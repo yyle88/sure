@@ -23,7 +23,7 @@ func TestGenCode(t *testing.T) {
 	ptx.Println("package", packageName)
 
 	param := &mustsoft_gen_cls.GenParam{
-		SourceCodeRootPath:    root,
+		SrcRoot:               root,
 		SubClassNamePartWords: "88",
 		SubClassNameStyleType: mustsoft_gen_cls.STYLE_SUFFIX_CAMELCASE_TYPE,
 	}

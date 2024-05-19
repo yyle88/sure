@@ -22,7 +22,7 @@ const (
 )
 
 type GenParam struct {
-	SourceCodeRootPath    string    //必填参数，你要解析的类型所在源代码的目录
+	SrcRoot               string    //这是必填参数，你要解析的类型所在源代码的目录（目前似乎没有能力通过object就得到代码目录）
 	SubClassName          string    //当只需要生成一个类的时候，当然是可以直接设置类名的，否则就要使用下面的字段配置生成的规则
 	SubClassNameStyleType StyleType //非必填参数，你要生成的新子类型的命名风格，有默认风格
 	SubClassNamePartWords string    //非必填参数，你要生成的新子类型的名称片段，就是这个名称字符串中间，有部分可以自定义的内容
