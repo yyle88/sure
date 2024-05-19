@@ -45,7 +45,7 @@ func Gen(cfg *Config, objects ...interface{}) {
 		importOptions = &syntaxgo_ast.PackageImportOptions{}
 	}
 	if cfg.GenParam.FlexibleClass == "" { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
-		importOptions.Objects = append(importOptions.Objects, syntaxgo_reflect.GetObject[mustdone.FlexibleEnum]())
+		importOptions.SetObject(syntaxgo_reflect.GetObject[mustdone.FlexibleEnum]())
 	}
 
 	//把需要 import 的包路径设置到代码里

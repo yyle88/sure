@@ -25,7 +25,7 @@ func TestGenCode(t *testing.T) {
 	param := &mustsoft_gen_cls.GenParam{
 		SrcRoot:               root,
 		SubClassNamePartWords: "88",
-		SubClassNameStyleType: mustsoft_gen_cls.STYLE_SUFFIX_CAMELCASE_TYPE,
+		SubClassNameStyleEnum: mustsoft_gen_cls.STYLE_SUFFIX_CAMELCASE_TYPE,
 	}
 	ptx.Println(mustsoft_gen_cls.GenerateFlexibleClassCode(param, Example{}))
 
