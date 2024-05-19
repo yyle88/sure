@@ -27,7 +27,7 @@ func TestGenCode(t *testing.T) {
 		SubClassNamePartWords: "88",
 		SubClassNameStyleType: mustsoft_gen_cls.STYLE_SUFFIX_CAMELCASE_TYPE,
 	}
-	ptx.Println(mustsoft_gen_cls.Gen(param, Example{}, mustdone.MUST, mustdone.SOFT))
+	ptx.Println(mustsoft_gen_cls.GenerateFlexibleClassCode(param, Example{}))
 
 	//很明显，当主动写 import 的时候，执行的 format 的速度特别快
 	packageImportOptions := &syntaxgo_ast.PackageImportOptions{

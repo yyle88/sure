@@ -16,15 +16,18 @@ import (
 	"go.uber.org/zap"
 )
 
-func Gen(cfg *GenParam, object any, flexibleEnums ...mustdone.FlexibleEnum) string {
+func GenerateFlexibleClassCode(cfg *GenParam, object interface{}) string {
 	ptx := utils.NewPTX()
-	for _, flexibleEnum := range flexibleEnums {
-		ptx.Println(GenerateFlexibleClassCode(cfg, object, flexibleEnum))
+	for _, flexibleEnum := range []mustdone.FlexibleEnum{
+		mustdone.MUST,
+		mustdone.SOFT,
+	} {
+		ptx.Println(GenerateFlexibleClassOnce(cfg, object, flexibleEnum))
 	}
 	return ptx.String()
 }
 
-func GenerateFlexibleClassCode(cfg *GenParam, object any, flexibleEnum mustdone.FlexibleEnum) string {
+func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum mustdone.FlexibleEnum) string {
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
