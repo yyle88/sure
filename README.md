@@ -30,13 +30,52 @@ func Soft(err error) {
 而且通过代码生成的逻辑让其它包也具备这种能力，即出错时要么崩溃要么告警，避免开发者反复处理各种error情况。
 
 ### 其它：
-在开发时也遇到了个非常困惑的事情，就是，我见别人定义的Must函数往往是这样使用的 `a := Must(dft)` 即假如计算错误就返回默认值，即必须返回结果让外部使用。
+在开发时也遇到了个非常困惑的事情，就是，我见别人定义的Must函数往往是这样使用的 `a := Must(defaultValue)` 即假如计算错误就返回默认值，即哪怕没有结果也必须返回结果。
+
+比如这个函数：
+```
+func (j *Json) MustInt(args ...int) int {
+	var def int
+
+	switch len(args) {
+	case 0:
+	case 1:
+		def = args[0]
+	default:
+		log.Panicf("MustInt() received too many arguments %d", len(args))
+	}
+
+	i, err := j.Int()
+	if err == nil {
+		return i
+	}
+
+	return def
+}
+```
+我当时看了很久才理解这里面 `must` 的意思，他甚至把默认值做成可选的，看来这里的 `must` 跟我理解的不同。
 
 而真正需要在出错时直接告警的，他们用的是 Require 函数，我滴神啊，看来英文不好的人是连 must 是啥意思都不懂，也是够悲催的。
 
-我认为的 `must` 是，你必须做成某件事得到结果，否则就要接受惩罚（`panic`），而他们理解的 `must` 是，我不管你遇到什么困难你都要给结果，他们更关注结果。
+我认为的 `must` 是，你必须做成某件事得到结果，否则就要接受惩罚（`panic`），而他们理解的 `must` 是，我不管你遇到什么困难你都要给结果，假如得不到结果就返回给你的默认值，他们更关注是必然得到结果。
 
 既然对 `must` 的理解有歧义的话这里我就说明白，我的 `must` 就是必须做成某件事，而且没有遇到错误情况，否则就会 `panic`，整个项目都是基于这个语境做的。
+
+比如：
+```
+func (T *SimpleMust) Strings(key string) (res []string) {
+	res, err1 := T.T.Strings(key)
+	mustdone.Must(err1)
+	return res
+}
+```
+调用：
+```
+tags := sim.Must().Strings("tags")
+```
+假如得不到就直接 `panic` 崩溃，相当于在获取值的时候，附带断言的效果。
+
+整个项目都是基于这个语境做的。
 
 ### 最终:
 Give me stars. Thank you!!!
