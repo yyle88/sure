@@ -44,7 +44,9 @@ func Gen(cfg *Config, objects ...interface{}) {
 	} else {
 		importOptions = &syntaxgo_ast.PackageImportOptions{}
 	}
-	if cfg.GenParam.FlexibleClass == "" { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
+	if cfg.GenParam.MustSoftCallableNode != "" {
+		zaplog.LOG.Debug("use_new_must_soft_node", zap.String("node", cfg.GenParam.MustSoftCallableNode))
+	} else { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
 		importOptions.SetObject(syntaxgo_reflect.GetObject[mustdone.FlexibleEnum]())
 	}
 
@@ -105,17 +107,17 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 		})
 	}
 
-	if cfg.OptRecvName == "" {
-		cfg.OptRecvName = utils.SOrX(astTuples.GetRecvName(), "T")
+	if cfg.SubClassRecvName == "" {
+		cfg.SubClassRecvName = utils.SOrX(astTuples.GetRecvName(), "T")
 	}
 
 	subClassName := cfg.makeClassName(reflect.TypeOf(object), flexibleEnum)
 
 	ptx := utils.NewPTX()
-	ptx.Println(`type ` + subClassName + ` struct{` + cfg.OptRecvName + ` *` + objectType.Name() + `}`)
+	ptx.Println(`type ` + subClassName + ` struct{` + cfg.SubClassRecvName + ` *` + objectType.Name() + `}`)
 	ptx.Println(`
-		func(` + cfg.OptRecvName + ` *` + objectType.Name() + `) ` + string(flexibleEnum) + `() * ` + subClassName + `{
-		return & ` + subClassName + `{` + cfg.OptRecvName + `:` + cfg.OptRecvName + `}
+		func(` + cfg.SubClassRecvName + ` *` + objectType.Name() + `) ` + string(flexibleEnum) + `() * ` + subClassName + `{
+		return & ` + subClassName + `{` + cfg.SubClassRecvName + `:` + cfg.SubClassRecvName + `}
 	}`)
 
 	for _, oneTmp := range astTuples {
@@ -152,13 +154,13 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 
 			var erxHandleStmts []string
 			for _, erxName := range erxResElems.GetFunctionParamsStats() {
-				var className string
-				if cfg.FlexibleClass != "" {
-					className = cfg.FlexibleClass
+				var callableNode string
+				if cfg.MustSoftCallableNode != "" {
+					callableNode = cfg.MustSoftCallableNode
 				} else {
-					className = mustdone.GetPkgName()
+					callableNode = mustdone.GetPkgName()
 				}
-				erxHandleStmts = append(erxHandleStmts, className+"."+string(flexibleEnum)+"("+erxName+")")
+				erxHandleStmts = append(erxHandleStmts, callableNode+"."+string(flexibleEnum)+"("+erxName+")")
 			}
 
 			ptx.Println(`func (T *` + subClassName + `) ` + mebFuncName + `(` +
@@ -167,7 +169,7 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 				okxResElems.GetNamesKindsStats().MergeParts() +
 				`) {`)
 
-			runFuncLine := `T.` + cfg.OptRecvName + `.` + mebFuncName + `(` + params.GetFunctionParamsStats().MergeParts() + `)`
+			runFuncLine := `T.` + cfg.SubClassRecvName + `.` + mebFuncName + `(` + params.GetFunctionParamsStats().MergeParts() + `)`
 			if len(results) > 0 {
 				if len(okxResElems) == len(results) {
 					ptx.Println(results.GetFunctionParamsStats().MergeParts() + "=" + runFuncLine)

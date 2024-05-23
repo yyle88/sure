@@ -1,8 +1,9 @@
-package example4
+package example5
 
 import (
 	"testing"
 
+	"github.com/yyle88/mustdone/internal/examples/example5/example5mustsoftnode"
 	"github.com/yyle88/mustdone/mustsoft_gen_cls"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/runpath/runtestpath"
@@ -12,10 +13,10 @@ import (
 
 func TestGen(t *testing.T) {
 	param := mustsoft_gen_cls.NewGenParam(runpath.PARENT.Path())
-	param.SetMustSoftCallableNode("done")
+	param.SetMustSoftCallableNode("example5mustsoftnode.NODE")
 
 	importOptions := syntaxgo_ast.NewPackageImportOptions()
-	importOptions.SetPkgPath("github.com/yyle88/done")
+	importOptions.SetObject(example5mustsoftnode.Node{})
 
 	cfg := &mustsoft_gen_cls.Config{
 		GenParam:      param,

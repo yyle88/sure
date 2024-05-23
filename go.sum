@@ -6,8 +6,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/yyle88/done v1.0.0 h1:LUjiWKqraciRLuq5FLvS/FrBN8gs2We8BhKY6J6oIg4=
-github.com/yyle88/done v1.0.0/go.mod h1:5bBQS7yAegSM0YbonyTHtP6q5tZ0NC/J2t17xAkXcsk=
+github.com/yyle88/done v1.0.3 h1:ndGmLNH24pZxkeZNv5ZfvVk/mL2VJauG5AO0hit3g/4=
+github.com/yyle88/done v1.0.3/go.mod h1:0EVloFXAPa8siScs7/4hsODHRxr8DaJYTmfaNv3RSXw=
 github.com/yyle88/erero v1.0.0 h1:NJztZomFXYGbjKsMus2gQ7xtOT+BjBe4UMjA+q52/jM=
 github.com/yyle88/erero v1.0.0/go.mod h1:wJiJkCvNrBtGSmqzEHFJvKM3hu9slUj8Sb0mPZJ+IvQ=
 github.com/yyle88/formatgo v1.0.0 h1:ocOCelukxDVHtmrve/HM/YMbqJjfZ119taYoRhuPtAo=

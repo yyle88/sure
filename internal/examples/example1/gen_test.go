@@ -15,7 +15,7 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 )
 
-func TestGenCode(t *testing.T) {
+func TestGen(t *testing.T) {
 	root := runpath.PARENT.Path()
 	packageName := syntaxgo.CurrentPackageName()
 

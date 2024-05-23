@@ -1,81 +1,83 @@
 # mustdone
-在我们开发golang代码时，经常会遇到比如 res, err := a.Run() 的情况。
+在我们开发golang代码时，经常会遇到
+```
+res, err := a.Run()
+if err != nil {
+    panic(err)
+}
+```
+的场景。比如这种场景：在main函数里，需要读个配置，假如读取出错就直接崩溃，这种操作就是有利于发现问题的，也有利于代码的简洁。
 
-这时假如使用 res := amust.Run() 或者 res := a.Must().Run()岂不是能够避免频繁的判断 if err != nil 啦。
+这时假如使用
+```
+res := a_must.Run() //假设 a 是个包，而通过 a 包能得到 a_must 包，里面自带出错时 panic 的逻辑。
+```
+或者
+```
+res := a.Must().Run() //假设 a 是个对象，能通过 A 类得到 AMust 类，里面自带出错时 panic 的逻辑。
+``` 
+岂不是能够避免频繁的判断 if err != nil 让程序变得更丝滑。
+
+这种丝滑是指可以让代码维持链式调用。
+
+比如原本的：
+```
+res, err := opt.GetRes()
+if err != nil {
+    panic(err)
+}
+abc, err := res.GetAbc()
+if err != nil {
+    panic(err)
+}
+xyz, err := abc.GetXyz()
+if err != nil {
+    panic(err)
+}
+```
+就可以这样:
+```
+xyz := opt.Must().GetRes().Must().GetAbc().Must().GetXyz()
+```
+这就比每次调用完判断是否有 error 简单些。
 
 这个包的目的就是提供这样的便利。
 
-当然本整活大师开发的 `github.com/yyle88/done` 也能解决问题，但毕竟不是还得多一层`nice`调用嘛。
-
-而这个工具将让代码自己提供错误时panic/ignore的选项。
-
-当然包名的话在mustsoft和mustgo和flexible间选择半天，最终想到也可以和`github.com/yyle88/done`套套近乎干脆就叫`mustdone`吧
-
-该包的核心就是提供两个函数
+## 代码生成（类操作）
+假设我们封装了个类 A 它有:
 ```
-// Must 硬硬的，当有err时直接panic崩溃掉，流程中止
-func Must(err error) {
-	if err != nil {
-		zaplog.LOG.Panic("must", zap.Error(err))
-	}
-}
-
-// Soft 软软的，当有err时只打印个告警日志，流程继续
-func Soft(err error) {
-	if err != nil {
-		zaplog.LOG.Warn("soft", zap.Error(err))
-	}
-}
+GetConfig(path string) (Config, error)
 ```
-而且通过代码生成的逻辑让其它包也具备这种能力，即出错时要么崩溃要么告警，避免开发者反复处理各种error情况。
-
-### 其它：
-在开发时也遇到了个非常困惑的事情，就是，我见别人定义的Must函数往往是这样使用的 `a := Must(defaultValue)` 即假如计算错误就返回默认值，即哪怕没有结果也必须返回结果。
-
-比如这个函数：
+而我们调用的时候常常这样用:
 ```
-func (j *Json) MustInt(args ...int) int {
-	var def int
-
-	switch len(args) {
-	case 0:
-	case 1:
-		def = args[0]
-	default:
-		log.Panicf("MustInt() received too many arguments %d", len(args))
-	}
-
-	i, err := j.Int()
-	if err == nil {
-		return i
-	}
-
-	return def
-}
+cfg, err := a.GetConfig(cfgPath)
+mustdone.Must(err) //读不到配置就直接退出
 ```
-我当时看了很久才理解这里面 `must` 的意思，他甚至把默认值做成可选的，看来这里的 `must` 跟我理解的不同。
-
-而真正需要在出错时直接告警的，他们用的是 Require 函数，我滴神啊，看来英文不好的人是连 must 是啥意思都不懂，也是够悲催的。
-
-我认为的 `must` 是，你必须做成某件事得到结果，否则就要接受惩罚（`panic`），而他们理解的 `must` 是，我不管你遇到什么困难你都要给结果，假如得不到结果就返回给你的默认值，他们更关注是必然得到结果。
-
-既然对 `must` 的理解有歧义的话这里我就说明白，我的 `must` 就是必须做成某件事，而且没有遇到错误情况，否则就会 `panic`，整个项目都是基于这个语境做的。
-
-比如：
+就简单地封装这个操作为这样:
 ```
-func (T *SimpleMust) Strings(key string) (res []string) {
-	res, err1 := T.T.Strings(key)
-	mustdone.Must(err1)
-	return res
-}
+cfg := a.Must().GetConfig(cfgPath)
 ```
-调用：
-```
-tags := sim.Must().Strings("tags")
-```
-假如得不到就直接 `panic` 崩溃，相当于在获取值的时候，附带断言的效果。
+这样岂不是非常方便，这就是“类操作生成逻辑”。
 
-整个项目都是基于这个语境做的。
+[Demo1](/internal/examples/example1)
+[Demo4](/internal/examples/example4)
+[Demo5](/internal/examples/example5)
 
-### 最终:
+## 代码生成（包操作）
+同样的，假如封装的函数在 `utils` 包里，常规的调用是这样的:
+```
+cfg, err := utils.GetConfig(cfgPath)
+mustdone.Must(err) //读不到配置就直接退出
+```
+经过代码生成以后会得到 `utils_must` 新包，调用就被简化为这样:
+```
+cfg := utils_must.GetConfig(cfgPath)
+```
+[Demo2](/internal/examples/example2)
+[Demo3](/internal/examples/example3)
+
+## 思路
+[创作背景](/internal/docs/CREATION_IDEAS.md)
+
+## 最终:
 Give me stars. Thank you!!!
