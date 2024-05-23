@@ -60,7 +60,9 @@ cfg := a.Must().GetConfig(cfgPath)
 这样岂不是非常方便，这就是“类操作生成逻辑”。
 
 [Demo1](/internal/examples/example1)
+
 [Demo4](/internal/examples/example4)
+
 [Demo5](/internal/examples/example5)
 
 ## 代码生成（包操作）
@@ -73,7 +75,9 @@ mustdone.Must(err) //读不到配置就直接退出
 ```
 cfg := utils_must.GetConfig(cfgPath)
 ```
+
 [Demo2](/internal/examples/example2)
+
 [Demo3](/internal/examples/example3)
 
 ## 思路
