@@ -46,7 +46,7 @@ func GenerateFlexiblePackage(
 	fmt.Println(pkgRoot, genRoot)
 
 	for _, name := range utils.MustLs(pkgRoot) {
-		if !strings.HasSuffix(name, ".go") {
+		if filepath.Ext(name) != ".go" {
 			continue
 		}
 		if strings.HasSuffix(name, "_test.go") {

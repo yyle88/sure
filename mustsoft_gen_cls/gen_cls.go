@@ -86,7 +86,7 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 		if subInfo.IsDir() {
 			continue
 		}
-		if !strings.HasSuffix(subInfo.Name(), ".go") {
+		if !(filepath.Ext(subInfo.Name()) == ".go") {
 			continue
 		}
 		path := filepath.Join(cfg.SrcRoot, subInfo.Name())
