@@ -1,4 +1,4 @@
-package mustsoft_gen_pkg
+package sure_pkg_gen
 
 import (
 	"testing"

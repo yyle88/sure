@@ -1,4 +1,4 @@
-package mustsoft_gen_cls
+package sure_cls_gen
 
 import (
 	"testing"

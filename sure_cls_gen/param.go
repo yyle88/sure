@@ -1,4 +1,4 @@
-package mustsoft_gen_cls
+package sure_cls_gen
 
 import (
 	"reflect"
@@ -27,8 +27,8 @@ type GenParam struct {
 	SubClassNamePartWords string    //非必填参数，你要生成的新子类型的名称片段，就是这个名称字符串中间，有部分可以自定义的内容
 	SubClassNameStyleEnum StyleEnum //非必填参数，你要生成的新子类型的命名风格，有默认风格
 	SubClassRecvName      string    //默认不填，你要解析的类型它的成员函数的recv的名称，比如 func (a *A)do() 就填写 a 就行
-	MustSoftCallableNode  string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
-	FlexibleEnums         []sure.FlexibleEnum
+	SureNode              string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
+	SureEnums             []sure.SureEnum
 }
 
 func NewGenParam(srcRoot string) *GenParam {
@@ -55,47 +55,47 @@ func (cfg *GenParam) SetSubClassRecvName(subClassRecvName string) *GenParam {
 	return cfg
 }
 
-func (cfg *GenParam) SetMustSoftCallableNode(callableNode string) *GenParam {
-	cfg.MustSoftCallableNode = callableNode
+func (cfg *GenParam) SetSureNode(sureNode string) *GenParam {
+	cfg.SureNode = sureNode
 	return cfg
 }
 
-func (cfg *GenParam) SetFlexibleEnum(flexibleEnum sure.FlexibleEnum) *GenParam {
-	cfg.FlexibleEnums = append(cfg.FlexibleEnums, flexibleEnum)
+func (cfg *GenParam) SetSureEnum(sureEnum sure.SureEnum) *GenParam {
+	cfg.SureEnums = append(cfg.SureEnums, sureEnum)
 	return cfg
 }
 
-func (cfg *GenParam) GetFlexibleEnums() []sure.FlexibleEnum {
-	if len(cfg.FlexibleEnums) != 0 {
-		return cfg.FlexibleEnums
+func (cfg *GenParam) GetSureEnums() []sure.SureEnum {
+	if len(cfg.SureEnums) != 0 {
+		return cfg.SureEnums
 	} else {
-		return []sure.FlexibleEnum{
+		return []sure.SureEnum{
 			sure.MUST,
 			sure.SOFT,
 		}
 	}
 }
 
-func (cfg *GenParam) makeClassName(objectType reflect.Type, flexibleEnum sure.FlexibleEnum) string {
+func (cfg *GenParam) makeClassName(objectType reflect.Type, sureEnum sure.SureEnum) string {
 	if cfg.SubClassName != "" {
 		return cfg.SubClassName
 	}
 
 	switch cfg.SubClassNameStyleEnum {
 	case STYLE_PREFIX_LOWER_TYPE:
-		return strings.ToLower(string(flexibleEnum)) + cfg.SubClassNamePartWords + objectType.Name()
+		return strings.ToLower(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
 	case STYLE_SUFFIX_LOWER_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToLower(string(flexibleEnum))
+		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToLower(string(sureEnum))
 
 	case STYLE_PREFIX_UPPER_TYPE:
-		return strings.ToUpper(string(flexibleEnum)) + cfg.SubClassNamePartWords + objectType.Name()
+		return strings.ToUpper(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
 	case STYLE_SUFFIX_UPPER_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToUpper(string(flexibleEnum))
+		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToUpper(string(sureEnum))
 
 	case STYLE_PREFIX_CAMELCASE_TYPE:
-		return string(flexibleEnum) + cfg.SubClassNamePartWords + objectType.Name()
+		return string(sureEnum) + cfg.SubClassNamePartWords + objectType.Name()
 	case STYLE_SUFFIX_CAMELCASE_TYPE, StyleEnum(""): //默认值就是 ClassNameMust 或者 ClassNameSoft 新类名
-		return objectType.Name() + cfg.SubClassNamePartWords + string(flexibleEnum)
+		return objectType.Name() + cfg.SubClassNamePartWords + string(sureEnum)
 	}
-	return strings.ToLower(string(flexibleEnum)) + cfg.SubClassNamePartWords + objectType.Name()
+	return strings.ToLower(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
 }

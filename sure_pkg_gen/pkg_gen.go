@@ -1,4 +1,4 @@
-package mustsoft_gen_pkg
+package sure_pkg_gen
 
 import (
 	"fmt"
@@ -20,25 +20,25 @@ import (
 func Gen(
 	t *testing.T,
 	pkgRoot string,
-	argEnum sure.FlexibleEnum,
+	sureEnum sure.SureEnum,
 	pkgPath string,
 ) {
-	GenerateFlexiblePackage(
+	GenerateSurePackage(
 		t,
 		pkgRoot,
 		pkgRoot,
-		argEnum,
+		sureEnum,
 		pkgPath,
 		sure.GetPkgPath(), //默认用这个包 "github.com/yyle88/sure"
 		sure.GetPkgName(), //默认使用 "sure" 调用软硬函数，比如 sure.Must(err) 和 sure.Soft(err) 因此很明显假如你有自己实现Must和Soft的话也可以用自己的
 	)
 }
 
-func GenerateFlexiblePackage(
+func GenerateSurePackage(
 	t *testing.T,
 	pkgRoot string,
 	genRoot string,
-	argEnum sure.FlexibleEnum,
+	sureEnum sure.SureEnum,
 	pkgPath string,
 	flexPkgPath string,
 	flexUseNode string,
@@ -71,20 +71,20 @@ func GenerateFlexiblePackage(
 				continue
 			}
 			t.Log(astFunc.Name.Name)
-			if !utils.C0IsUpperString(astFunc.Name.Name) {
+			if !utils.C0IsUPPER(astFunc.Name.Name) {
 				continue
 			}
 			results, anonymous := parseResFields(srcData, astFunc)
-			t.Log(utils.NeatString(results))
+			t.Log(utils.Neat(results))
 
-			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, argEnum, flexUseNode)
+			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, sureEnum, flexUseNode)
 			t.Log(sFuncCode)
 
 			sliceFuncCodes = append(sliceFuncCodes, sFuncCode)
 		}
 
 		if len(sliceFuncCodes) > 0 {
-			var shortFlexName = strings.ToLower(string(argEnum))
+			var shortFlexName = strings.ToLower(string(sureEnum))
 
 			newPackageName := packageName + "_" + shortFlexName
 
@@ -101,12 +101,12 @@ func GenerateFlexiblePackage(
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
 
-			utils.MustWriteFileToPath(newPath, newCode)
+			utils.MustWriteToPath(newPath, newCode)
 		}
 	}
 }
 
-func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleEnum sure.FlexibleEnum, flexUseNode string) string {
+func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, sureEnum sure.SureEnum, flexUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
 		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)
@@ -195,7 +195,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	if len(results) > 0 {
 		for _, x := range results {
 			if x.Type == "error" {
-				res += flexUseNode + "." + string(flexibleEnum) + "(" + x.Name + ")" + "\n"
+				res += flexUseNode + "." + string(sureEnum) + "(" + x.Name + ")" + "\n"
 			}
 		}
 	}
@@ -216,7 +216,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 }
 
 func cvtAZType(packageName string, genericsMap map[string]int, res *retType) string {
-	if utils.C0IsUpperString(res.Type) {
+	if utils.C0IsUPPER(res.Type) {
 		classType := res.Type
 		if _, ok := genericsMap[classType]; ok {
 			return res.Type
@@ -228,7 +228,7 @@ func cvtAZType(packageName string, genericsMap map[string]int, res *retType) str
 		if _, ok := genericsMap[classType]; ok {
 			return res.Type
 		}
-		if utils.C0IsUpperString(classType) {
+		if utils.C0IsUPPER(classType) {
 			return "*" + packageName + "." + classType
 		}
 	}

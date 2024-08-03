@@ -5,7 +5,7 @@ import (
 
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/sure"
-	"github.com/yyle88/sure/mustsoft_gen_pkg"
+	"github.com/yyle88/sure/sure_pkg_gen"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 )
 
@@ -15,7 +15,7 @@ func TestGen(t *testing.T) {
 	pkgPath := syntaxgo_reflect.GetPkgPathV2[ObjectType]()
 
 	//选择生成 soft 软包
-	mustsoft_gen_pkg.Gen(t, runpath.PARENT.Path(), sure.SOFT, pkgPath)
+	sure_pkg_gen.Gen(t, runpath.PARENT.Path(), sure.SOFT, pkgPath)
 	//选择生成 must 硬包
-	mustsoft_gen_pkg.Gen(t, runpath.PARENT.Path(), sure.MUST, pkgPath)
+	sure_pkg_gen.Gen(t, runpath.PARENT.Path(), sure.MUST, pkgPath)
 }

@@ -25,12 +25,12 @@ func BooleanOK(v bool) bool {
 	return v
 }
 
-func NeatString(v interface{}) (string, error) {
+func Neat(v interface{}) string {
 	data, err := NeatBytes(v)
 	if err != nil {
-		return "", errors.WithMessage(err, "wrong")
+		panic(errors.WithMessage(err, "wrong"))
 	}
-	return string(data), nil
+	return string(data)
 }
 
 func NeatBytes(v interface{}) ([]byte, error) {
@@ -62,7 +62,7 @@ func RootMustIsExist(root string) bool {
 	return !os.IsNotExist(err) && info != nil && info.IsDir()
 }
 
-func MustWriteFileToPath(path string, s string) {
+func MustWriteToPath(path string, s string) {
 	done.Done(os.MkdirAll(filepath.Dir(path), 0755))
 	done.Done(os.WriteFile(path, []byte(s), 0644))
 }
@@ -80,7 +80,7 @@ func MustLs(root string) (names []string) {
 	return
 }
 
-func C0IsUpperString(s string) bool {
+func C0IsUPPER(s string) bool {
 	runes := []rune(s)
 	if len(runes) > 0 {
 		return unicode.IsUpper(runes[0])

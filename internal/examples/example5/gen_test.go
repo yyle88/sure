@@ -5,24 +5,24 @@ import (
 
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/runpath/runtestpath"
-	"github.com/yyle88/sure/internal/examples/example5/example5mustsoftnode"
-	"github.com/yyle88/sure/mustsoft_gen_cls"
+	"github.com/yyle88/sure/internal/examples/example5/example5surenode"
+	"github.com/yyle88/sure/sure_cls_gen"
 	"github.com/yyle88/syntaxgo"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 )
 
 func TestGen(t *testing.T) {
-	param := mustsoft_gen_cls.NewGenParam(runpath.PARENT.Path())
-	param.SetMustSoftCallableNode("example5mustsoftnode.NODE")
+	param := sure_cls_gen.NewGenParam(runpath.PARENT.Path())
+	param.SetSureNode("example5surenode.NODE")
 
 	importOptions := syntaxgo_ast.NewPackageImportOptions()
-	importOptions.SetObject(example5mustsoftnode.Node{})
+	importOptions.SetObject(example5surenode.Node{})
 
-	cfg := &mustsoft_gen_cls.Config{
+	cfg := &sure_cls_gen.Config{
 		GenParam:      param,
 		PkgName:       syntaxgo.CurrentPackageName(),
 		ImportOptions: importOptions,
 		SrcPath:       runtestpath.SrcPath(t),
 	}
-	mustsoft_gen_cls.Gen(cfg, Example{}, Demo{})
+	sure_cls_gen.Gen(cfg, Example{}, Demo{})
 }

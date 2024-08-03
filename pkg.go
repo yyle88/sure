@@ -7,9 +7,9 @@ import (
 )
 
 func GetPkgPath() string {
-	return reflect.TypeOf(syntaxgo_reflect.GetObject[FlexibleEnum]()).PkgPath()
+	return reflect.TypeOf(syntaxgo_reflect.GetObject[SureEnum]()).PkgPath()
 }
 
 func GetPkgName() string {
-	return syntaxgo_reflect.GetPkgName(syntaxgo_reflect.GetObject[FlexibleEnum]())
+	return syntaxgo_reflect.GetPkgName(syntaxgo_reflect.GetObject[SureEnum]())
 }

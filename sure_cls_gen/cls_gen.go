@@ -1,4 +1,4 @@
-package mustsoft_gen_cls
+package sure_cls_gen
 
 import (
 	"go/ast"
@@ -35,7 +35,7 @@ func Gen(cfg *Config, objects ...interface{}) {
 	ptx.Println("package", cfg.PkgName)
 
 	for _, object := range objects {
-		ptx.Println(GenerateFlexibleClassCode(cfg.GenParam, object))
+		ptx.Println(GenerateSureClassCode(cfg.GenParam, object))
 	}
 
 	var importOptions *syntaxgo_ast.PackageImportOptions
@@ -44,10 +44,10 @@ func Gen(cfg *Config, objects ...interface{}) {
 	} else {
 		importOptions = &syntaxgo_ast.PackageImportOptions{}
 	}
-	if cfg.GenParam.MustSoftCallableNode != "" {
-		zaplog.LOG.Debug("use_new_must_soft_node", zap.String("node", cfg.GenParam.MustSoftCallableNode))
+	if cfg.GenParam.SureNode != "" {
+		zaplog.LOG.Debug("use_new_sure_node", zap.String("node", cfg.GenParam.SureNode))
 	} else { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
-		importOptions.SetObject(syntaxgo_reflect.GetObject[sure.FlexibleEnum]())
+		importOptions.SetObject(syntaxgo_reflect.GetObject[sure.SureEnum]())
 	}
 
 	//把需要 import 的包路径设置到代码里
@@ -63,15 +63,15 @@ func Gen(cfg *Config, objects ...interface{}) {
 	zaplog.LOG.Debug("gen_success")
 }
 
-func GenerateFlexibleClassCode(cfg *GenParam, object interface{}) string {
+func GenerateSureClassCode(cfg *GenParam, object interface{}) string {
 	ptx := utils.NewPTX()
-	for _, flexibleEnum := range cfg.GetFlexibleEnums() {
-		ptx.Println(GenerateFlexibleClassOnce(cfg, object, flexibleEnum))
+	for _, sureEnum := range cfg.GetSureEnums() {
+		ptx.Println(GenerateSureClassOnce(cfg, object, sureEnum))
 	}
 	return ptx.String()
 }
 
-func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum sure.FlexibleEnum) string {
+func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.SureEnum) string {
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
@@ -79,7 +79,7 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum s
 
 	utils.RootMustIsExist(cfg.SrcRoot)
 
-	utils.BooleanOK(flexibleEnum == sure.MUST || flexibleEnum == sure.SOFT)
+	utils.BooleanOK(sureEnum == sure.MUST || sureEnum == sure.SOFT)
 
 	var astTuples = make(srcFnsTuples, 0)
 	for _, subInfo := range done.VAE(os.ReadDir(cfg.SrcRoot)).Done() {
@@ -111,12 +111,12 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum s
 		cfg.SubClassRecvName = utils.SOrX(astTuples.GetRecvName(), "T")
 	}
 
-	subClassName := cfg.makeClassName(reflect.TypeOf(object), flexibleEnum)
+	subClassName := cfg.makeClassName(reflect.TypeOf(object), sureEnum)
 
 	ptx := utils.NewPTX()
 	ptx.Println(`type ` + subClassName + ` struct{` + cfg.SubClassRecvName + ` *` + objectType.Name() + `}`)
 	ptx.Println(`
-		func(` + cfg.SubClassRecvName + ` *` + objectType.Name() + `) ` + string(flexibleEnum) + `() * ` + subClassName + `{
+		func(` + cfg.SubClassRecvName + ` *` + objectType.Name() + `) ` + string(sureEnum) + `() * ` + subClassName + `{
 		return & ` + subClassName + `{` + cfg.SubClassRecvName + `:` + cfg.SubClassRecvName + `}
 	}`)
 
@@ -154,13 +154,13 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum s
 
 			var erxHandleStmts []string
 			for _, erxName := range erxResElems.GetFunctionParamsStats() {
-				var callableNode string
-				if cfg.MustSoftCallableNode != "" {
-					callableNode = cfg.MustSoftCallableNode
+				var sureNode string
+				if cfg.SureNode != "" {
+					sureNode = cfg.SureNode
 				} else {
-					callableNode = sure.GetPkgName()
+					sureNode = sure.GetPkgName()
 				}
-				erxHandleStmts = append(erxHandleStmts, callableNode+"."+string(flexibleEnum)+"("+erxName+")")
+				erxHandleStmts = append(erxHandleStmts, sureNode+"."+string(sureEnum)+"("+erxName+")")
 			}
 
 			ptx.Println(`func (T *` + subClassName + `) ` + mebFuncName + `(` +

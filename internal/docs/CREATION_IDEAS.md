@@ -77,7 +77,7 @@ tags := sim.Must().Strings("tags")
 整个项目都是基于这个语境做的。
 
 ## 相似的包
-当然包名的话在mustsoft和mustgo和flexible间选择半天，最终想到也可以和`github.com/yyle88/done`套套近乎干脆就叫`sure`吧
+当然包名的话在mustsoft(软硬)和mustgo(硬搞)和flexible(灵动)和mustdone(必达)间选择半天，最终想到也可以和`github.com/yyle88/done`作伴就叫`sure`吧，相对短些。
 
 当然本整活大师开发的 `github.com/yyle88/done` 也能解决问题，但毕竟不是还得多一层`nice`调用嘛，而且每次都在外面包一层，当包装调用超过两层时就会让代码变得不易读。
 

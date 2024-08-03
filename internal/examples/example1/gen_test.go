@@ -3,45 +3,24 @@ package example1
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	"github.com/yyle88/formatgo"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/runpath/runtestpath"
-	"github.com/yyle88/sure"
-	"github.com/yyle88/sure/internal/utils"
-	"github.com/yyle88/sure/mustsoft_gen_cls"
+	"github.com/yyle88/sure/sure_cls_gen"
 	"github.com/yyle88/syntaxgo"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 )
 
 func TestGen(t *testing.T) {
-	root := runpath.PARENT.Path()
-	packageName := syntaxgo.CurrentPackageName()
-
-	ptx := utils.NewPTX()
-	ptx.Println("package", packageName)
-
-	param := &mustsoft_gen_cls.GenParam{
-		SrcRoot:               root,
+	param := &sure_cls_gen.GenParam{
+		SrcRoot:               runpath.PARENT.Path(),
 		SubClassNamePartWords: "88",
-		SubClassNameStyleEnum: mustsoft_gen_cls.STYLE_SUFFIX_CAMELCASE_TYPE,
+		SubClassNameStyleEnum: sure_cls_gen.STYLE_SUFFIX_CAMELCASE_TYPE,
 	}
-	ptx.Println(mustsoft_gen_cls.GenerateFlexibleClassCode(param, Example{}))
-
-	//很明显，当主动写 import 的时候，执行的 format 的速度特别快
-	packageImportOptions := &syntaxgo_ast.PackageImportOptions{
-		Packages:   nil,
-		UsingTypes: nil,
-		Objects: []any{
-			syntaxgo_reflect.GetObject[sure.FlexibleEnum](),
-		},
+	cfg := &sure_cls_gen.Config{
+		GenParam:      param,
+		PkgName:       syntaxgo.CurrentPackageName(),
+		ImportOptions: syntaxgo_ast.NewPackageImportOptions(),
+		SrcPath:       runtestpath.SrcPath(t),
 	}
-	source := syntaxgo_ast.AddImports(ptx.Bytes(), packageImportOptions)
-	//假如你不在写文件的时候 format，代码格式就不美观，而执行 format 时，最后确保它不再去找包名，因为当项目过大时找包名会变得很困难的
-	newSource, err := formatgo.FormatBytes(source)
-	require.NoError(t, err)
-
-	srcPath := runtestpath.SrcPath(t)
-	require.NoError(t, utils.WriteFile(srcPath, newSource))
+	sure_cls_gen.Gen(cfg, Example{})
 }
