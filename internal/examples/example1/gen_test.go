@@ -11,11 +11,10 @@ import (
 )
 
 func TestGen(t *testing.T) {
-	param := &sure_cls_gen.GenParam{
-		SrcRoot:               runpath.PARENT.Path(),
-		SubClassNamePartWords: "88",
-		SubClassNameStyleEnum: sure_cls_gen.STYLE_SUFFIX_CAMELCASE_TYPE,
-	}
+	param := sure_cls_gen.NewGenParam(runpath.PARENT.Path())
+	param.SetSubClassNamePartWords("88")
+	param.SetSubClassNameStyleEnum(sure_cls_gen.STYLE_SUFFIX_CAMELCASE_TYPE)
+
 	cfg := &sure_cls_gen.Config{
 		GenParam:      param,
 		PkgName:       syntaxgo.CurrentPackageName(),
