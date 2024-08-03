@@ -1,11 +1,11 @@
-package mustdone_test
+package sure_test
 
 import (
 	"encoding/json"
 	"testing"
 
 	"github.com/pkg/errors"
-	"github.com/yyle88/mustdone"
+	"github.com/yyle88/sure"
 )
 
 func TestMain(m *testing.M) {
@@ -21,13 +21,13 @@ func TestMust(t *testing.T) {
 	t.Log(example)
 
 	data, err := json.Marshal(example)
-	mustdone.Must(err) //当没有错误时就什么也不做，当出错时将 panic 崩溃
+	sure.Must(err) //当没有错误时就什么也不做，当出错时将 panic 崩溃
 
 	t.Log(string(data))
 }
 
 func TestSoft(t *testing.T) {
 	t.Log("-")
-	mustdone.Soft(errors.New("wrong")) //将会告警，而且程序将继续执行
+	sure.Soft(errors.New("wrong")) //将会告警，而且程序将继续执行
 	t.Log("-")
 }

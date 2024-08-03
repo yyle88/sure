@@ -1,6 +1,6 @@
 package example5
 
-import "github.com/yyle88/mustdone/internal/examples/example5/example5mustsoftnode"
+import "github.com/yyle88/sure/internal/examples/example5/example5mustsoftnode"
 
 type ExampleMust struct{ a *Example }
 

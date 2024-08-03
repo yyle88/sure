@@ -10,8 +10,8 @@ import (
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
-	"github.com/yyle88/mustdone"
-	"github.com/yyle88/mustdone/internal/utils"
+	"github.com/yyle88/sure"
+	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
@@ -47,7 +47,7 @@ func Gen(cfg *Config, objects ...interface{}) {
 	if cfg.GenParam.MustSoftCallableNode != "" {
 		zaplog.LOG.Debug("use_new_must_soft_node", zap.String("node", cfg.GenParam.MustSoftCallableNode))
 	} else { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
-		importOptions.SetObject(syntaxgo_reflect.GetObject[mustdone.FlexibleEnum]())
+		importOptions.SetObject(syntaxgo_reflect.GetObject[sure.FlexibleEnum]())
 	}
 
 	//把需要 import 的包路径设置到代码里
@@ -71,7 +71,7 @@ func GenerateFlexibleClassCode(cfg *GenParam, object interface{}) string {
 	return ptx.String()
 }
 
-func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum mustdone.FlexibleEnum) string {
+func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum sure.FlexibleEnum) string {
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
@@ -79,7 +79,7 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 
 	utils.RootMustIsExist(cfg.SrcRoot)
 
-	utils.BooleanOK(flexibleEnum == mustdone.MUST || flexibleEnum == mustdone.SOFT)
+	utils.BooleanOK(flexibleEnum == sure.MUST || flexibleEnum == sure.SOFT)
 
 	var astTuples = make(srcFnsTuples, 0)
 	for _, subInfo := range done.VAE(os.ReadDir(cfg.SrcRoot)).Done() {
@@ -125,7 +125,7 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 		mebFunctions := oneTmp.methods
 		for _, mebFunc := range mebFunctions {
 			mebFuncName := syntaxgo_ast.GetNodeCode(source, mebFunc.Name)
-			if utils.In(mebFuncName, []string{string(mustdone.MUST), string(mustdone.SOFT)}) {
+			if utils.In(mebFuncName, []string{string(sure.MUST), string(sure.SOFT)}) {
 				continue
 			}
 
@@ -158,7 +158,7 @@ func GenerateFlexibleClassOnce(cfg *GenParam, object interface{}, flexibleEnum m
 				if cfg.MustSoftCallableNode != "" {
 					callableNode = cfg.MustSoftCallableNode
 				} else {
-					callableNode = mustdone.GetPkgName()
+					callableNode = sure.GetPkgName()
 				}
 				erxHandleStmts = append(erxHandleStmts, callableNode+"."+string(flexibleEnum)+"("+erxName+")")
 			}

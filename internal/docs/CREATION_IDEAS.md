@@ -17,11 +17,11 @@ func Soft(err error)
 在代码逻辑里就可以这样使用:
 ```
 data, err := json.Marshal(example)
-mustdone.Must(err) //当没有错误时就什么也不做，当出错时将 panic 崩溃
+sure.Must(err) //当没有错误时就什么也不做，当出错时将 panic 崩溃
 ```
 或者使用:
 ```
-mustdone.Soft(err) //当没有错误时就什么也不做，当出错时将会打印 waring 日志
+sure.Soft(err) //当没有错误时就什么也不做，当出错时将会打印 waring 日志
 ```
 当然很明显的，像这样粗暴的抛出异常，或者直接忽略错误，在正式场景下可能是不适用的，需要注意。
 
@@ -64,7 +64,7 @@ func (j *Json) MustInt(args ...int) int {
 ```
 func (T *SimpleMust) Strings(key string) (res []string) {
 	res, err1 := T.T.Strings(key)
-	mustdone.Must(err1)
+	sure.Must(err1)
 	return res
 }
 ```
@@ -77,7 +77,7 @@ tags := sim.Must().Strings("tags")
 整个项目都是基于这个语境做的。
 
 ## 相似的包
-当然包名的话在mustsoft和mustgo和flexible间选择半天，最终想到也可以和`github.com/yyle88/done`套套近乎干脆就叫`mustdone`吧
+当然包名的话在mustsoft和mustgo和flexible间选择半天，最终想到也可以和`github.com/yyle88/done`套套近乎干脆就叫`sure`吧
 
 当然本整活大师开发的 `github.com/yyle88/done` 也能解决问题，但毕竟不是还得多一层`nice`调用嘛，而且每次都在外面包一层，当包装调用超过两层时就会让代码变得不易读。
 

@@ -5,11 +5,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/yyle88/formatgo"
-	"github.com/yyle88/mustdone"
-	"github.com/yyle88/mustdone/internal/utils"
-	"github.com/yyle88/mustdone/mustsoft_gen_cls"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/runpath/runtestpath"
+	"github.com/yyle88/sure"
+	"github.com/yyle88/sure/internal/utils"
+	"github.com/yyle88/sure/mustsoft_gen_cls"
 	"github.com/yyle88/syntaxgo"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
@@ -34,7 +34,7 @@ func TestGen(t *testing.T) {
 		Packages:   nil,
 		UsingTypes: nil,
 		Objects: []any{
-			syntaxgo_reflect.GetObject[mustdone.FlexibleEnum](),
+			syntaxgo_reflect.GetObject[sure.FlexibleEnum](),
 		},
 	}
 	source := syntaxgo_ast.AddImports(ptx.Bytes(), packageImportOptions)

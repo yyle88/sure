@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/yyle88/mustdone"
+	"github.com/yyle88/sure"
 )
 
 type StyleEnum string
@@ -28,7 +28,7 @@ type GenParam struct {
 	SubClassNameStyleEnum StyleEnum //非必填参数，你要生成的新子类型的命名风格，有默认风格
 	SubClassRecvName      string    //默认不填，你要解析的类型它的成员函数的recv的名称，比如 func (a *A)do() 就填写 a 就行
 	MustSoftCallableNode  string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
-	FlexibleEnums         []mustdone.FlexibleEnum
+	FlexibleEnums         []sure.FlexibleEnum
 }
 
 func NewGenParam(srcRoot string) *GenParam {
@@ -60,23 +60,23 @@ func (cfg *GenParam) SetMustSoftCallableNode(callableNode string) *GenParam {
 	return cfg
 }
 
-func (cfg *GenParam) SetFlexibleEnum(flexibleEnum mustdone.FlexibleEnum) *GenParam {
+func (cfg *GenParam) SetFlexibleEnum(flexibleEnum sure.FlexibleEnum) *GenParam {
 	cfg.FlexibleEnums = append(cfg.FlexibleEnums, flexibleEnum)
 	return cfg
 }
 
-func (cfg *GenParam) GetFlexibleEnums() []mustdone.FlexibleEnum {
+func (cfg *GenParam) GetFlexibleEnums() []sure.FlexibleEnum {
 	if len(cfg.FlexibleEnums) != 0 {
 		return cfg.FlexibleEnums
 	} else {
-		return []mustdone.FlexibleEnum{
-			mustdone.MUST,
-			mustdone.SOFT,
+		return []sure.FlexibleEnum{
+			sure.MUST,
+			sure.SOFT,
 		}
 	}
 }
 
-func (cfg *GenParam) makeClassName(objectType reflect.Type, flexibleEnum mustdone.FlexibleEnum) string {
+func (cfg *GenParam) makeClassName(objectType reflect.Type, flexibleEnum sure.FlexibleEnum) string {
 	if cfg.SubClassName != "" {
 		return cfg.SubClassName
 	}

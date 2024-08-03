@@ -3,9 +3,9 @@ package example4
 import (
 	"testing"
 
-	"github.com/yyle88/mustdone/mustsoft_gen_cls"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/runpath/runtestpath"
+	"github.com/yyle88/sure/mustsoft_gen_cls"
 	"github.com/yyle88/syntaxgo"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 )

@@ -1,4 +1,4 @@
-module github.com/yyle88/mustdone
+module github.com/yyle88/sure
 
 go 1.22.3
 

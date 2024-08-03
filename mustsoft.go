@@ -1,4 +1,4 @@
-package mustdone
+package sure
 
 import (
 	"github.com/yyle88/zaplog"

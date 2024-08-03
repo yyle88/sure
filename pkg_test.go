@@ -1,15 +1,15 @@
-package mustdone_test
+package sure_test
 
 import (
 	"testing"
 
-	"github.com/yyle88/mustdone"
+	"github.com/yyle88/sure"
 )
 
 func TestGetPkgPath(t *testing.T) {
-	t.Log(mustdone.GetPkgPath())
+	t.Log(sure.GetPkgPath())
 }
 
 func TestGetPkgName(t *testing.T) {
-	t.Log(mustdone.GetPkgName())
+	t.Log(sure.GetPkgName())
 }

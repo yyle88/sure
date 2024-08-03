@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/yyle88/mustdone/internal/examples/example1"
-	"github.com/yyle88/mustdone/internal/examples/example2/example2_must"
-	"github.com/yyle88/mustdone/internal/examples/example2/example2_soft"
-	"github.com/yyle88/mustdone/internal/examples/example3/example3_must"
-	"github.com/yyle88/mustdone/internal/examples/example3/example3_soft"
-	"github.com/yyle88/mustdone/internal/examples/example4"
+	"github.com/yyle88/sure/internal/examples/example1"
+	"github.com/yyle88/sure/internal/examples/example2/example2_must"
+	"github.com/yyle88/sure/internal/examples/example2/example2_soft"
+	"github.com/yyle88/sure/internal/examples/example3/example3_must"
+	"github.com/yyle88/sure/internal/examples/example3/example3_soft"
+	"github.com/yyle88/sure/internal/examples/example4"
 )
 
 func TestExample1(t *testing.T) {

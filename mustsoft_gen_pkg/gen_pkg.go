@@ -11,8 +11,8 @@ import (
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
-	"github.com/yyle88/mustdone"
-	"github.com/yyle88/mustdone/internal/utils"
+	"github.com/yyle88/sure"
+	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
 )
@@ -20,7 +20,7 @@ import (
 func Gen(
 	t *testing.T,
 	pkgRoot string,
-	argEnum mustdone.FlexibleEnum,
+	argEnum sure.FlexibleEnum,
 	pkgPath string,
 ) {
 	GenerateFlexiblePackage(
@@ -29,8 +29,8 @@ func Gen(
 		pkgRoot,
 		argEnum,
 		pkgPath,
-		mustdone.GetPkgPath(), //默认用这个包 "github.com/yyle88/mustdone"
-		mustdone.GetPkgName(), //默认使用 "mustdone" 调用软硬函数，比如 mustdone.Must(err) 和 mustdone.Soft(err) 因此很明显假如你有自己实现Must和Soft的话也可以用自己的
+		sure.GetPkgPath(), //默认用这个包 "github.com/yyle88/sure"
+		sure.GetPkgName(), //默认使用 "sure" 调用软硬函数，比如 sure.Must(err) 和 sure.Soft(err) 因此很明显假如你有自己实现Must和Soft的话也可以用自己的
 	)
 }
 
@@ -38,7 +38,7 @@ func GenerateFlexiblePackage(
 	t *testing.T,
 	pkgRoot string,
 	genRoot string,
-	argEnum mustdone.FlexibleEnum,
+	argEnum sure.FlexibleEnum,
 	pkgPath string,
 	flexPkgPath string,
 	flexUseNode string,
@@ -106,7 +106,7 @@ func GenerateFlexiblePackage(
 	}
 }
 
-func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleEnum mustdone.FlexibleEnum, flexUseNode string) string {
+func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, flexibleEnum sure.FlexibleEnum, flexUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
 		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
-	"github.com/yyle88/mustdone/internal/utils"
+	"github.com/yyle88/sure/internal/utils"
 )
 
 func Neat[T any](a T) ([]byte, error) {

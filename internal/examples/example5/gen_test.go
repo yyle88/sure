@@ -3,10 +3,10 @@ package example5
 import (
 	"testing"
 
-	"github.com/yyle88/mustdone/internal/examples/example5/example5mustsoftnode"
-	"github.com/yyle88/mustdone/mustsoft_gen_cls"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/runpath/runtestpath"
+	"github.com/yyle88/sure/internal/examples/example5/example5mustsoftnode"
+	"github.com/yyle88/sure/mustsoft_gen_cls"
 	"github.com/yyle88/syntaxgo"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 )
