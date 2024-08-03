@@ -27,7 +27,7 @@ type GenParam struct {
 	SubClassNamePartWords string    //非必填参数，你要生成的新子类型的名称片段，就是这个名称字符串中间，有部分可以自定义的内容
 	SubClassNameStyleEnum StyleEnum //非必填参数，你要生成的新子类型的命名风格，有默认风格
 	SubClassRecvName      string    //默认不填，你要解析的类型它的成员函数的recv的名称，比如 func (a *A)do() 就填写 a 就行
-	SureNode              string    //非必填参数，就是调用 FLEX 函数的调用者，你也可以实现自己的 flex 函数，默认用 flex 包的
+	SureNode              string    //非必填参数，就是调用 SURE 函数的调用者，你也可以实现自己的 sure 函数，默认用 sure 包的
 	SureEnums             []sure.SureEnum
 }
 

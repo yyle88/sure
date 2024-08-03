@@ -40,8 +40,8 @@ func GenerateSurePackage(
 	genRoot string,
 	sureEnum sure.SureEnum,
 	pkgPath string,
-	flexPkgPath string,
-	flexUseNode string,
+	surePkgPath string,
+	sureUseNode string,
 ) {
 	fmt.Println(pkgRoot, genRoot)
 
@@ -77,26 +77,26 @@ func GenerateSurePackage(
 			results, anonymous := parseResFields(srcData, astFunc)
 			t.Log(utils.Neat(results))
 
-			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, sureEnum, flexUseNode)
+			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, sureEnum, sureUseNode)
 			t.Log(sFuncCode)
 
 			sliceFuncCodes = append(sliceFuncCodes, sFuncCode)
 		}
 
 		if len(sliceFuncCodes) > 0 {
-			var shortFlexName = strings.ToLower(string(sureEnum))
+			var shortSureName = strings.ToLower(string(sureEnum))
 
-			newPackageName := packageName + "_" + shortFlexName
+			newPackageName := packageName + "_" + shortSureName
 
 			ptx := utils.NewPTX()
 			ptx.Println("package" + " " + newPackageName)
 			ptx.Println("import(")
 			ptx.Println(utils.SetDoubleQuotes(pkgPath))
-			ptx.Println(utils.SetDoubleQuotes(flexPkgPath))
+			ptx.Println(utils.SetDoubleQuotes(surePkgPath))
 			ptx.Println(")")
 			ptx.Println(strings.Join(sliceFuncCodes, "\n"))
 
-			newName := strings.Replace(name, ".go", "_"+shortFlexName+".go", 1)
+			newName := strings.Replace(name, ".go", "_"+shortSureName+".go", 1)
 			newPath := filepath.Join(genRoot, newPackageName, newName)
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
@@ -106,7 +106,7 @@ func GenerateSurePackage(
 	}
 }
 
-func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, sureEnum sure.SureEnum, flexUseNode string) string {
+func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, sureEnum sure.SureEnum, sureUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
 		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)
@@ -195,7 +195,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	if len(results) > 0 {
 		for _, x := range results {
 			if x.Type == "error" {
-				res += flexUseNode + "." + string(sureEnum) + "(" + x.Name + ")" + "\n"
+				res += sureUseNode + "." + string(sureEnum) + "(" + x.Name + ")" + "\n"
 			}
 		}
 	}
