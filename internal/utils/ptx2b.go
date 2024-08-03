@@ -7,6 +7,7 @@ import (
 	"github.com/yyle88/done"
 )
 
+//goland:noinspection GoExportedFuncWithUnexportedType
 func NewPTX() *print2Bytes {
 	return &print2Bytes{}
 }
