@@ -28,9 +28,9 @@ type Config struct {
 }
 
 func Gen(cfg *Config, objects ...interface{}) {
-	utils.StringOK(cfg.GenParam.SrcRoot)
-	utils.StringOK(cfg.PkgName)
-	utils.StringOK(cfg.SrcPath)
+	utils.AssertStOK(cfg.GenParam.SrcRoot)
+	utils.AssertStOK(cfg.PkgName)
+	utils.AssertStOK(cfg.SrcPath)
 
 	ptx := utils.NewPTX()
 	ptx.Println("package", cfg.PkgName)
@@ -78,14 +78,14 @@ func GenerateSureClassCode(cfg *GenParam, object interface{}) string {
 
 func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.SureEnum) string {
 	objectType := reflect.TypeOf(object)
-	zaplog.LOG.Debug(utils.StringOK(objectType.Name()))
-	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
-	zaplog.LOG.Debug(utils.StringOK(objectType.PkgPath()))
+	zaplog.LOG.Debug(utils.AssertStOK(objectType.Name()))
+	zaplog.LOG.Debug(utils.AssertStOK(objectType.String()))
+	zaplog.LOG.Debug(utils.AssertStOK(objectType.PkgPath()))
 
 	utils.MustRoot(cfg.SrcRoot)
 
 	if len(cfg.SureEnums) == 0 { //当不填的时候就只能是默认的这两个枚举，而当填的时候允许开发者自定义别的
-		utils.BooleanOK(sureEnum == sure.MUST || sureEnum == sure.SOFT)
+		utils.AssertTRUE(sureEnum == sure.MUST || sureEnum == sure.SOFT)
 	}
 
 	var astTuples = make(srcFnsTuples, 0)

@@ -11,14 +11,14 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func StringOK(s string) string {
+func AssertStOK(s string) string {
 	if s == "" {
 		zaplog.ZAPS.P1.LOG.Panic("S IS EMPTY")
 	}
 	return s
 }
 
-func BooleanOK(v bool) bool {
+func AssertTRUE(v bool) bool {
 	if !v {
 		zaplog.ZAPS.P1.LOG.Panic("B IS FALSE")
 	}
@@ -57,14 +57,14 @@ func In[V comparable](a V, slice []V) bool {
 	return false
 }
 
-func MustRoot(root string) bool {
+func MustRoot(root string) {
 	info, err := os.Stat(root)
-	return !os.IsNotExist(err) && info != nil && info.IsDir()
+	AssertTRUE(!os.IsNotExist(err) && info != nil && info.IsDir())
 }
 
-func MustFile(path string) bool {
+func MustFile(path string) {
 	info, err := os.Stat(path)
-	return !os.IsNotExist(err) && info != nil && !info.IsDir() //这是简化版的就不要考虑其它错误啦
+	AssertTRUE(!os.IsNotExist(err) && info != nil && !info.IsDir()) //这是简化版的就不要考虑其它错误啦
 }
 
 func MustWriteIntoPath(path string, s string) {

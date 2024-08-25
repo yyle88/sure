@@ -19,6 +19,7 @@ func TestGen(t *testing.T) {
 		TargetPkgName: syntaxgo.CurrentPackageName(),
 		ImportOptions: syntaxgo_ast.NewPackageImportOptions(),
 		TargetSrcPath: runtestpath.SrcPath(t),
+		CanCreateFile: false,
 	}
 	cls_stub_gen.Gen(cfg, param)
 }
