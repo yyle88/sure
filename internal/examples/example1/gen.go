@@ -33,3 +33,19 @@ func (T *Example88Soft) GetS() (res string) {
 	sure.Soft(err1)
 	return res
 }
+
+type Example88Omit struct{ a *Example }
+
+func (a *Example) Omit() *Example88Omit {
+	return &Example88Omit{a: a}
+}
+func (T *Example88Omit) GetN() (res int) {
+	res, err1 := T.a.GetN()
+	sure.Omit(err1)
+	return res
+}
+func (T *Example88Omit) GetS() (res string) {
+	res, err1 := T.a.GetS()
+	sure.Omit(err1)
+	return res
+}

@@ -1,6 +1,7 @@
 package sure_cls_gen
 
 import (
+	"fmt"
 	"go/ast"
 	"os"
 	"path/filepath"
@@ -59,7 +60,11 @@ func Gen(cfg *Config, objects ...interface{}) {
 	//把格式化后的代码写到对应的文件路径里
 	duration := time.Since(startTime)
 	zaplog.LOG.Debug("gen", zap.Duration("format_cost_duration", duration))
-	done.Done(utils.WriteFile(cfg.SrcPath, newSource))
+	if cfg.SrcPath != "" {
+		done.Done(utils.WriteFile(cfg.SrcPath, newSource))
+	} else {
+		fmt.Println(newSource)
+	}
 	zaplog.LOG.Debug("gen_success")
 }
 
@@ -77,9 +82,11 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 	zaplog.LOG.Debug(utils.StringOK(objectType.String()))
 	zaplog.LOG.Debug(utils.StringOK(objectType.PkgPath()))
 
-	utils.RootMustIsExist(cfg.SrcRoot)
+	utils.MustRoot(cfg.SrcRoot)
 
-	utils.BooleanOK(sureEnum == sure.MUST || sureEnum == sure.SOFT)
+	if len(cfg.SureEnums) == 0 { //当不填的时候就只能是默认的这两个枚举，而当填的时候允许开发者自定义别的
+		utils.BooleanOK(sureEnum == sure.MUST || sureEnum == sure.SOFT)
+	}
 
 	var astTuples = make(srcFnsTuples, 0)
 	for _, subInfo := range done.VAE(os.ReadDir(cfg.SrcRoot)).Done() {
@@ -95,15 +102,15 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 		source := done.VAE(os.ReadFile(path)).Done()
 
 		astFile := done.VCE(syntaxgo_ast.NewAstFromSource(source)).Nice()
-		astFns := syntaxgo_ast.GetFunctions(astFile)
-		mebFunctions := syntaxgo_ast.GetFunctionsXRecvName(astFns, objectType.Name(), true)
-		if len(mebFunctions) == 0 {
+		astFcXs := syntaxgo_ast.GetFunctions(astFile)
+		methods := syntaxgo_ast.GetFunctionsXRecvName(astFcXs, objectType.Name(), true)
+		if len(methods) == 0 {
 			continue
 		}
 
 		astTuples = append(astTuples, &srcFnsTuple{
 			srcCode: source,
-			methods: mebFunctions,
+			methods: methods,
 		})
 	}
 
@@ -122,10 +129,13 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 
 	for _, oneTmp := range astTuples {
 		source := oneTmp.srcCode
-		mebFunctions := oneTmp.methods
-		for _, mebFunc := range mebFunctions {
+		methods := oneTmp.methods
+		for _, mebFunc := range methods {
 			mebFuncName := syntaxgo_ast.GetNodeCode(source, mebFunc.Name)
 			if utils.In(mebFuncName, []string{string(sure.MUST), string(sure.SOFT)}) {
+				continue
+			}
+			if utils.In(sure.SureEnum(mebFuncName), cfg.SureEnums) {
 				continue
 			}
 

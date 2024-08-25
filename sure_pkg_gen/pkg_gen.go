@@ -60,10 +60,10 @@ func GenerateSurePackage(
 
 		packageName := astFile.Name.Name
 
-		astFns := syntaxgo_ast.GetFunctions(astFile)
+		astFcXs := syntaxgo_ast.GetFunctions(astFile)
 
 		var sliceFuncCodes []string
-		for _, astFunc := range astFns {
+		for _, astFunc := range astFcXs {
 			if astFunc.Recv != nil {
 				if len(astFunc.Recv.List) > 0 && len(astFunc.Recv.List[0].Names) > 0 {
 					t.Log(astFunc.Recv.List[0].Names[0].Name, astFunc.Name.Name)
@@ -101,7 +101,7 @@ func GenerateSurePackage(
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
 
-			utils.MustWriteToPath(newPath, newCode)
+			utils.MustWriteIntoPath(newPath, newCode)
 		}
 	}
 }

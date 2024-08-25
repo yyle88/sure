@@ -11,6 +11,7 @@ type SureEnum string //意思是"柔性的"、"灵活的"，是遇到错误是�
 const (
 	MUST SureEnum = "Must" //硬硬的，出错时就崩溃
 	SOFT SureEnum = "Soft" //软软的，出错时仅告警
+	OMIT SureEnum = "Omit" //忽略的，出错时无视它
 )
 
 // Must 硬硬的，当有err时直接panic崩溃掉，流程中止
@@ -24,5 +25,12 @@ func Must(err error) {
 func Soft(err error) {
 	if err != nil {
 		zaplog.LOGS.P1.Warn("soft", zap.Error(err))
+	}
+}
+
+// Omit 忽略的，当有err时不做任何提示动作，流程继续
+func Omit(err error) {
+	if err != nil {
+		_ = err // 仅忽略错误
 	}
 }

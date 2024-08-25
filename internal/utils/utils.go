@@ -57,12 +57,12 @@ func In[V comparable](a V, slice []V) bool {
 	return false
 }
 
-func RootMustIsExist(root string) bool {
+func MustRoot(root string) bool {
 	info, err := os.Stat(root)
 	return !os.IsNotExist(err) && info != nil && info.IsDir()
 }
 
-func MustWriteToPath(path string, s string) {
+func MustWriteIntoPath(path string, s string) {
 	done.Done(os.MkdirAll(filepath.Dir(path), 0755))
 	done.Done(os.WriteFile(path, []byte(s), 0644))
 }

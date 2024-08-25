@@ -60,19 +60,16 @@ func (cfg *GenParam) SetSureNode(sureNode string) *GenParam {
 	return cfg
 }
 
-func (cfg *GenParam) SetSureEnum(sureEnum sure.SureEnum) *GenParam {
-	cfg.SureEnums = append(cfg.SureEnums, sureEnum)
+func (cfg *GenParam) SetSureEnum(sureEnum ...sure.SureEnum) *GenParam {
+	cfg.SureEnums = append(cfg.SureEnums, sureEnum...)
 	return cfg
 }
 
 func (cfg *GenParam) GetSureEnums() []sure.SureEnum {
 	if len(cfg.SureEnums) != 0 {
-		return cfg.SureEnums
+		return cfg.SureEnums //当有设置时只返回设置的
 	} else {
-		return []sure.SureEnum{
-			sure.MUST,
-			sure.SOFT,
-		}
+		return []sure.SureEnum{sure.MUST, sure.SOFT} //当没有设置时，返回默认的两个最主要的
 	}
 }
 
