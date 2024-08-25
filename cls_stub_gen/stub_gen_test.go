@@ -29,6 +29,7 @@ func TestGen(t *testing.T) {
 		TargetPkgName: "p_p_p",
 		ImportOptions: nil,
 		TargetSrcPath: "",
+		CanCreateFile: false,
 	}, &Param{
 		object: A{},
 		opStub: "a_a_a",

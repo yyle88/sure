@@ -35,6 +35,7 @@ type Config struct {
 	TargetPkgName string
 	ImportOptions *syntaxgo_ast.PackageImportOptions
 	TargetSrcPath string
+	CanCreateFile bool //当目标文件不存在时，能否能新建文件，假如设置为不能，就必须得找到文件才能写内容
 }
 
 func Gen(cfg *Config, params ...*Param) {
@@ -74,6 +75,11 @@ func Gen(cfg *Config, params ...*Param) {
 	duration := time.Since(startTime)
 	zaplog.LOG.Debug("gen", zap.Duration("format_cost_duration", duration))
 	if cfg.TargetSrcPath != "" {
+		if cfg.CanCreateFile { //当确定目标不是必须存在时，就不检查目标文件，但这有可能导致配置错误而写到错误的地方
+			zaplog.LOG.Warn("write to target src path", zap.String("path", cfg.TargetSrcPath))
+		} else { //推荐还是首先自己把文件建好，让程序能找到这个文件，再去重写它的内容
+			utils.MustFile(cfg.TargetSrcPath) //规定目标是必须存在的
+		}
 		done.Done(utils.WriteFile(cfg.TargetSrcPath, newSource))
 	} else {
 		fmt.Println(newSource)
