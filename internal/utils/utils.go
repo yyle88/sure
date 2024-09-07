@@ -11,7 +11,7 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func AssertStOK(s string) string {
+func AssertStvOK(s string) string {
 	if s == "" {
 		zaplog.ZAPS.P1.LOG.Panic("S IS EMPTY")
 	}

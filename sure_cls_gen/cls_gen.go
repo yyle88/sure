@@ -28,9 +28,9 @@ type Config struct {
 }
 
 func Gen(cfg *Config, objects ...interface{}) {
-	utils.AssertStOK(cfg.GenParam.SrcRoot)
-	utils.AssertStOK(cfg.PkgName)
-	utils.AssertStOK(cfg.SrcPath)
+	utils.AssertStvOK(cfg.GenParam.SrcRoot)
+	utils.AssertStvOK(cfg.PkgName)
+	utils.AssertStvOK(cfg.SrcPath)
 
 	ptx := utils.NewPTX()
 	ptx.Println("package", cfg.PkgName)
@@ -78,9 +78,9 @@ func GenerateSureClassCode(cfg *GenParam, object interface{}) string {
 
 func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.SureEnum) string {
 	objectType := reflect.TypeOf(object)
-	zaplog.LOG.Debug(utils.AssertStOK(objectType.Name()))
-	zaplog.LOG.Debug(utils.AssertStOK(objectType.String()))
-	zaplog.LOG.Debug(utils.AssertStOK(objectType.PkgPath()))
+	zaplog.LOG.Debug(utils.AssertStvOK(objectType.Name()))
+	zaplog.LOG.Debug(utils.AssertStvOK(objectType.String()))
+	zaplog.LOG.Debug(utils.AssertStvOK(objectType.PkgPath()))
 
 	utils.MustRoot(cfg.SrcRoot)
 

@@ -39,9 +39,9 @@ type Config struct {
 }
 
 func Gen(cfg *Config, params ...*Param) {
-	utils.AssertStOK(cfg.SrcRoot)
-	utils.AssertStOK(cfg.TargetPkgName)
-	utils.AssertStOK(cfg.TargetSrcPath)
+	utils.AssertStvOK(cfg.SrcRoot)
+	utils.AssertStvOK(cfg.TargetPkgName)
+	utils.AssertStvOK(cfg.TargetSrcPath)
 
 	ptx := utils.NewPTX()
 	ptx.Println("package", cfg.TargetPkgName)
@@ -89,9 +89,9 @@ func Gen(cfg *Config, params ...*Param) {
 
 func GenerateStubFunctions(cfg *Config, param *Param) string {
 	objectType := syntaxgo_reflect.GetTypeV3(param.object)
-	zaplog.LOG.Debug(utils.AssertStOK(objectType.Name()))
-	zaplog.LOG.Debug(utils.AssertStOK(objectType.String()))
-	zaplog.LOG.Debug(utils.AssertStOK(objectType.PkgPath()))
+	zaplog.LOG.Debug(utils.AssertStvOK(objectType.Name()))
+	zaplog.LOG.Debug(utils.AssertStvOK(objectType.String()))
+	zaplog.LOG.Debug(utils.AssertStvOK(objectType.PkgPath()))
 
 	utils.MustRoot(cfg.SrcRoot)
 
