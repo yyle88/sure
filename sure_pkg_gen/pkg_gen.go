@@ -17,42 +17,21 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
 )
 
-func Gen(
-	t *testing.T,
-	pkgRoot string,
-	sureEnum sure.SureEnum,
-	pkgPath string,
-) {
-	GenerateSurePackage(
-		t,
-		pkgRoot,
-		pkgRoot,
-		sureEnum,
-		pkgPath,
-		sure.GetPkgPath(), //默认用这个包 "github.com/yyle88/sure"
-		sure.GetPkgName(), //默认使用 "sure" 调用软硬函数，比如 sure.Must(err) 和 sure.Soft(err) 因此很明显假如你有自己实现Must和Soft的话也可以用自己的
-	)
+func Gen(t *testing.T, pkgRoot string, sureEnum sure.SureEnum, pkgPath string) {
+	GenerateSurePackage(t, NewConfig(pkgRoot, sureEnum, pkgPath))
 }
 
-func GenerateSurePackage(
-	t *testing.T,
-	pkgRoot string,
-	genRoot string,
-	sureEnum sure.SureEnum,
-	pkgPath string,
-	surePkgPath string,
-	sureUseNode string,
-) {
-	fmt.Println(pkgRoot, genRoot)
+func GenerateSurePackage(t *testing.T, cfg *Config) {
+	fmt.Println(cfg.PkgRoot, cfg.GenRoot)
 
-	for _, name := range utils.MustLs(pkgRoot) {
+	for _, name := range utils.MustLs(cfg.PkgRoot) {
 		if filepath.Ext(name) != ".go" {
 			continue
 		}
 		if strings.HasSuffix(name, "_test.go") {
 			continue
 		}
-		absPath := filepath.Join(pkgRoot, name)
+		absPath := filepath.Join(cfg.PkgRoot, name)
 		srcData := done.VAE(os.ReadFile(absPath)).Done()
 
 		astFile, err := syntaxgo_ast.NewAstXFilepath(absPath)
@@ -77,27 +56,32 @@ func GenerateSurePackage(
 			results, anonymous := parseResFields(srcData, astFunc)
 			t.Log(utils.Neat(results))
 
-			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, sureEnum, sureUseNode)
+			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, cfg.SureEnum, cfg.SureUseNode)
 			t.Log(sFuncCode)
 
 			sliceFuncCodes = append(sliceFuncCodes, sFuncCode)
 		}
 
 		if len(sliceFuncCodes) > 0 {
-			var shortSureName = strings.ToLower(string(sureEnum))
+			shortSureName := strings.ToLower(string(cfg.SureEnum))
 
-			newPackageName := packageName + "_" + shortSureName
+			var newPackageName string
+			if cfg.NewPkgName != "" {
+				newPackageName = cfg.NewPkgName
+			} else {
+				newPackageName = packageName + "_" + shortSureName
+			}
 
 			ptx := utils.NewPTX()
 			ptx.Println("package" + " " + newPackageName)
 			ptx.Println("import(")
-			ptx.Println(utils.SetDoubleQuotes(pkgPath))
-			ptx.Println(utils.SetDoubleQuotes(surePkgPath))
+			ptx.Println(utils.SetDoubleQuotes(cfg.PkgPath))
+			ptx.Println(utils.SetDoubleQuotes(cfg.SurePkgPath))
 			ptx.Println(")")
 			ptx.Println(strings.Join(sliceFuncCodes, "\n"))
 
 			newName := strings.Replace(name, ".go", "_"+shortSureName+".go", 1)
-			newPath := filepath.Join(genRoot, newPackageName, newName)
+			newPath := filepath.Join(cfg.GenRoot, newPackageName, newName)
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
 
