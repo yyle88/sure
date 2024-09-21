@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/yyle88/done"
+	"github.com/yyle88/erero"
 	"github.com/yyle88/zaplog"
 )
 
@@ -58,13 +59,33 @@ func In[V comparable](a V, slice []V) bool {
 }
 
 func MustRoot(root string) {
-	info, err := os.Stat(root)
-	AssertTRUE(!os.IsNotExist(err) && info != nil && info.IsDir())
+	done.VBE(IsRootExists(root)).TRUE()
 }
 
 func MustFile(path string) {
+	done.VBE(IsFileExists(path)).TRUE()
+}
+
+func IsRootExists(path string) (bool, error) {
 	info, err := os.Stat(path)
-	AssertTRUE(!os.IsNotExist(err) && info != nil && !info.IsDir()) //这是简化版的就不要考虑其它错误啦
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil // 路径不存在
+		}
+		return false, erero.Wro(err) // 其他的错误
+	}
+	return info.IsDir(), nil
+}
+
+func IsFileExists(path string) (bool, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil // 路径不存在
+		}
+		return false, erero.Wro(err) // 其他的错误
+	}
+	return !info.IsDir(), nil
 }
 
 func MustWriteIntoPath(path string, s string) {
