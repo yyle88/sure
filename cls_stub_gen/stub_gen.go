@@ -10,6 +10,7 @@ import (
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
+	"github.com/yyle88/must"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
@@ -39,9 +40,9 @@ type Config struct {
 }
 
 func Gen(cfg *Config, params ...*Param) {
-	utils.AssertStvOK(cfg.SrcRoot)
-	utils.AssertStvOK(cfg.TargetPkgName)
-	utils.AssertStvOK(cfg.TargetSrcPath)
+	must.Nice(cfg.SrcRoot)
+	must.Nice(cfg.TargetPkgName)
+	must.Nice(cfg.TargetSrcPath)
 
 	ptx := utils.NewPTX()
 	ptx.Println("package", cfg.TargetPkgName)
@@ -89,9 +90,9 @@ func Gen(cfg *Config, params ...*Param) {
 
 func GenerateStubFunctions(cfg *Config, param *Param) string {
 	objectType := syntaxgo_reflect.GetTypeV3(param.object)
-	zaplog.LOG.Debug(utils.AssertStvOK(objectType.Name()))
-	zaplog.LOG.Debug(utils.AssertStvOK(objectType.String()))
-	zaplog.LOG.Debug(utils.AssertStvOK(objectType.PkgPath()))
+	zaplog.LOG.Debug(must.Nice(objectType.Name()))
+	zaplog.LOG.Debug(must.Nice(objectType.String()))
+	zaplog.LOG.Debug(must.Nice(objectType.PkgPath()))
 
 	utils.MustRoot(cfg.SrcRoot)
 

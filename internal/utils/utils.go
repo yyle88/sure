@@ -4,27 +4,13 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"unicode"
 
 	"github.com/pkg/errors"
 	"github.com/yyle88/done"
 	"github.com/yyle88/erero"
-	"github.com/yyle88/zaplog"
 )
-
-func AssertStvOK(s string) string {
-	if s == "" {
-		zaplog.ZAPS.P1.LOG.Panic("S IS EMPTY")
-	}
-	return s
-}
-
-func AssertTRUE(v bool) bool {
-	if !v {
-		zaplog.ZAPS.P1.LOG.Panic("B IS FALSE")
-	}
-	return v
-}
 
 func Neat(v interface{}) string {
 	data, err := NeatBytes(v)
@@ -49,13 +35,8 @@ func SOrX(s, x string) string {
 	return s
 }
 
-func In[V comparable](a V, slice []V) bool {
-	for _, s := range slice {
-		if a == s {
-			return true
-		}
-	}
-	return false
+func In[V comparable](v V, slice []V) bool {
+	return slices.Contains(slice, v)
 }
 
 func MustRoot(root string) {

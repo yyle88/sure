@@ -11,6 +11,7 @@ import (
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
+	"github.com/yyle88/must"
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
@@ -28,9 +29,9 @@ type Config struct {
 }
 
 func Gen(cfg *Config, objects ...interface{}) {
-	utils.AssertStvOK(cfg.GenParam.SrcRoot)
-	utils.AssertStvOK(cfg.PkgName)
-	utils.AssertStvOK(cfg.SrcPath)
+	must.Nice(cfg.GenParam.SrcRoot)
+	must.Nice(cfg.PkgName)
+	must.Nice(cfg.SrcPath)
 
 	ptx := utils.NewPTX()
 	ptx.Println("package", cfg.PkgName)
@@ -78,14 +79,14 @@ func GenerateSureClassCode(cfg *GenParam, object interface{}) string {
 
 func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.SureEnum) string {
 	objectType := reflect.TypeOf(object)
-	zaplog.LOG.Debug(utils.AssertStvOK(objectType.Name()))
-	zaplog.LOG.Debug(utils.AssertStvOK(objectType.String()))
-	zaplog.LOG.Debug(utils.AssertStvOK(objectType.PkgPath()))
+	zaplog.LOG.Debug(must.Nice(objectType.Name()))
+	zaplog.LOG.Debug(must.Nice(objectType.String()))
+	zaplog.LOG.Debug(must.Nice(objectType.PkgPath()))
 
 	utils.MustRoot(cfg.SrcRoot)
 
 	if len(cfg.SureEnums) == 0 { //当不填的时候就只能是默认的这两个枚举，而当填的时候允许开发者自定义别的
-		utils.AssertTRUE(sureEnum == sure.MUST || sureEnum == sure.SOFT)
+		must.True(sureEnum == sure.MUST || sureEnum == sure.SOFT)
 	}
 
 	var astTuples = make(srcFnsTuples, 0)
