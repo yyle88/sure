@@ -15,8 +15,9 @@ import (
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
+	"github.com/yyle88/syntaxgo/syntaxgo_astvtnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
+	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
 	"go.uber.org/zap"
 )
@@ -115,9 +116,10 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 		})
 	}
 
-	if cfg.SubClassRecvName == "" {
-		cfg.SubClassRecvName = utils.SOrX(astTuples.GetRecvName(), "T")
-	}
+	// when zero - set a new value
+	zerotern.PF(&cfg.SubClassRecvName, func() string {
+		return zerotern.VV(astTuples.GetRecvName(), "T")
+	})
 
 	subClassName := cfg.makeClassName(reflect.TypeOf(object), sureEnum)
 
@@ -140,21 +142,21 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 				continue
 			}
 
-			var params = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
+			var params = make(syntaxgo_astvtnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Params != nil {
-				params = syntaxgo_astfieldsflat.GetSimpleArgElements(mebFunc.Type.Params.List, source)
+				params = syntaxgo_astvtnorm.GetSimpleArgElements(mebFunc.Type.Params.List, source)
 			}
-			var results = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
+			var results = make(syntaxgo_astvtnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Results != nil {
-				results = syntaxgo_astfieldsflat.GetSimpleResElements(mebFunc.Type.Results.List, source)
+				results = syntaxgo_astvtnorm.GetSimpleResElements(mebFunc.Type.Results.List, source)
 			}
 
 			for _, elem := range results {
 				zaplog.LOG.Debug("elem", zap.String("name", elem.Name), zap.String("kind", elem.Kind))
 			}
 
-			var okxResElems = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
-			var erxResElems = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
+			var okxResElems = make(syntaxgo_astvtnorm.NameTypeElements, 0)
+			var erxResElems = make(syntaxgo_astvtnorm.NameTypeElements, 0)
 			for _, result := range results {
 				if syntaxgo_ast.GetNodeCode(source, result.Type) == "error" {
 					erxResElems = append(erxResElems, result)
@@ -165,12 +167,8 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 
 			var erxHandleStmts []string
 			for _, erxName := range erxResElems.GetFunctionParamsStats() {
-				var sureNode string
-				if cfg.SureNode != "" {
-					sureNode = cfg.SureNode
-				} else {
-					sureNode = sure.GetPkgName()
-				}
+				sureNode := zerotern.VF(cfg.SureNode, sure.GetPkgName)
+
 				erxHandleStmts = append(erxHandleStmts, sureNode+"."+string(sureEnum)+"("+erxName+")")
 			}
 

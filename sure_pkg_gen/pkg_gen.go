@@ -14,7 +14,9 @@ import (
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
+	"github.com/yyle88/syntaxgo/syntaxgo_astvtnorm"
+	"github.com/yyle88/tern"
+	"github.com/yyle88/tern/zerotern"
 )
 
 func Gen(t *testing.T, pkgRoot string, sureEnum sure.SureEnum, pkgPath string) {
@@ -64,13 +66,7 @@ func GenerateSurePackage(t *testing.T, cfg *Config) {
 
 		if len(sliceFuncCodes) > 0 {
 			shortSureName := strings.ToLower(string(cfg.SureEnum))
-
-			var newPackageName string
-			if cfg.NewPkgName != "" {
-				newPackageName = cfg.NewPkgName
-			} else {
-				newPackageName = packageName + "_" + shortSureName
-			}
+			newPackageName := zerotern.VV(cfg.NewPkgName, packageName+"_"+shortSureName)
 
 			ptx := utils.NewPTX()
 			ptx.Println("package" + " " + newPackageName)
@@ -120,7 +116,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	}
 	res += ")"
 
-	genericsMap := syntaxgo_astfieldsflat.CountGenericsMap(astFunc.Type.TypeParams)
+	genericsMap := syntaxgo_astvtnorm.CountGenericsMap(astFunc.Type.TypeParams)
 
 	var isReturnErrors = false
 	{
@@ -233,18 +229,14 @@ func parseResFields(source []byte, astFunction *ast.FuncDecl) ([]*retType, bool)
 		var errNum int
 		for _, x := range astFunction.Type.Results.List {
 			resType := syntaxgo_ast.GetNodeCode(source, x.Type)
-			eIs := bool(resType == "error")
+			eIs := utils.Boolean(resType == "error")
 			if len(x.Names) == 0 {
-				var resName string
-				if eIs {
-					if errNum == 0 {
-						resName = "err"
-					} else {
-						resName = "err" + strconv.Itoa(errNum)
-					}
-				} else {
-					resName = "res" + strconv.Itoa(len(results))
-				}
+				resName := tern.BFF(eIs, func() string {
+					return tern.BVV(errNum == 0, "err", "err"+strconv.Itoa(errNum))
+				}, func() string {
+					return "res" + strconv.Itoa(len(results))
+				})
+
 				results = append(results, &retType{
 					Name: resName,
 					Type: resType,

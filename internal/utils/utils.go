@@ -28,13 +28,6 @@ func NeatBytes(v interface{}) ([]byte, error) {
 	return data, nil
 }
 
-func SOrX(s, x string) string {
-	if s == "" {
-		return x
-	}
-	return s
-}
-
 func In[V comparable](v V, slice []V) bool {
 	return slices.Contains(slice, v)
 }
@@ -97,4 +90,8 @@ func C0IsUPPER(s string) bool {
 
 func SetDoubleQuotes(s string) string {
 	return "\"" + s + "\""
+}
+
+func Boolean(v bool) bool {
+	return v
 }

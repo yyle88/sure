@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/yyle88/sure"
+	"github.com/yyle88/tern"
+	"github.com/yyle88/tern/zerotern"
 )
 
 type StyleEnum string
@@ -66,33 +68,29 @@ func (cfg *GenParam) SetSureEnum(sureEnum ...sure.SureEnum) *GenParam {
 }
 
 func (cfg *GenParam) GetSureEnums() []sure.SureEnum {
-	if len(cfg.SureEnums) != 0 {
-		return cfg.SureEnums //当有设置时只返回设置的
-	} else {
+	return tern.BVF(len(cfg.SureEnums) != 0, cfg.SureEnums, func() []sure.SureEnum {
 		return []sure.SureEnum{sure.MUST, sure.SOFT} //当没有设置时，返回默认的两个最主要的
-	}
+	})
 }
 
 func (cfg *GenParam) makeClassName(objectType reflect.Type, sureEnum sure.SureEnum) string {
-	if cfg.SubClassName != "" {
-		return cfg.SubClassName
-	}
+	return zerotern.VF(cfg.SubClassName, func() string {
+		switch cfg.SubClassNameStyleEnum {
+		case STYLE_PREFIX_LOWER_TYPE:
+			return strings.ToLower(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
+		case STYLE_SUFFIX_LOWER_TYPE:
+			return objectType.Name() + cfg.SubClassNamePartWords + strings.ToLower(string(sureEnum))
 
-	switch cfg.SubClassNameStyleEnum {
-	case STYLE_PREFIX_LOWER_TYPE:
+		case STYLE_PREFIX_UPPER_TYPE:
+			return strings.ToUpper(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
+		case STYLE_SUFFIX_UPPER_TYPE:
+			return objectType.Name() + cfg.SubClassNamePartWords + strings.ToUpper(string(sureEnum))
+
+		case STYLE_PREFIX_CAMELCASE_TYPE:
+			return string(sureEnum) + cfg.SubClassNamePartWords + objectType.Name()
+		case STYLE_SUFFIX_CAMELCASE_TYPE, StyleEnum(""): //默认值就是 ClassNameMust 或者 ClassNameSoft 新类名
+			return objectType.Name() + cfg.SubClassNamePartWords + string(sureEnum)
+		}
 		return strings.ToLower(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_SUFFIX_LOWER_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToLower(string(sureEnum))
-
-	case STYLE_PREFIX_UPPER_TYPE:
-		return strings.ToUpper(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_SUFFIX_UPPER_TYPE:
-		return objectType.Name() + cfg.SubClassNamePartWords + strings.ToUpper(string(sureEnum))
-
-	case STYLE_PREFIX_CAMELCASE_TYPE:
-		return string(sureEnum) + cfg.SubClassNamePartWords + objectType.Name()
-	case STYLE_SUFFIX_CAMELCASE_TYPE, StyleEnum(""): //默认值就是 ClassNameMust 或者 ClassNameSoft 新类名
-		return objectType.Name() + cfg.SubClassNamePartWords + string(sureEnum)
-	}
-	return strings.ToLower(string(sureEnum)) + cfg.SubClassNamePartWords + objectType.Name()
+	})
 }

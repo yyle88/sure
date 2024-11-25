@@ -10,8 +10,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
-github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
-github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
+github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
+github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/yyle88/done v1.0.17 h1:jrFPAi6NQY6xFATqCBSNd1XjZV2kM6jwdOhnao4Z4Bs=
 github.com/yyle88/done v1.0.17/go.mod h1:xIJ57RqfY6zRHhcDHSdOSpgaFAF2RfHf7IE2ApQo7I0=
 github.com/yyle88/erero v1.0.12 h1:GHeXTSiywMDAQDgALSBMcZN4sobQB5CtRWPq3VVSZAI=
@@ -24,10 +24,12 @@ github.com/yyle88/mutexmap v1.0.7 h1:i4inpmq0fEvwxG9XGunxBVQBt0eAZEWL7ezurkQifqY
 github.com/yyle88/mutexmap v1.0.7/go.mod h1:lAEDkpXe9iSU0/8L/SaXAQ6TUa+4A9nnl9OQ56zHEQY=
 github.com/yyle88/printgo v1.0.0 h1:GIY8NLNV7xbnOUcioziV1w+d12swItdR+Dlt+1vxvnU=
 github.com/yyle88/printgo v1.0.0/go.mod h1:+n+PKFM0seJ4zX6OTHLB8OsQOHfH/jiP0x9f8DBn9Vg=
-github.com/yyle88/runpath v1.0.10 h1:mID9MJNy3fKuOL+nF1NqpsOU6/s980xQ8pwNNQbDFvE=
-github.com/yyle88/runpath v1.0.10/go.mod h1:q/MwsaROo6uRRFnB+ZxV9iMX4K5j4P3iEeShrkfUYyo=
-github.com/yyle88/syntaxgo v0.0.31 h1:bjjSIM+Cn0nGs5P/r7X/SCNdNYAERLAV2E3ZojMpNHo=
-github.com/yyle88/syntaxgo v0.0.31/go.mod h1:ExhX7CJfAVJEhFWCGjgx5AcDny6JX0vJrOH4hK7nRmk=
+github.com/yyle88/runpath v1.0.21 h1:uWi1QrMCU5QUWU1oJJxbmlSCrCwPDRe+tlikV0JbvWM=
+github.com/yyle88/runpath v1.0.21/go.mod h1:JRGxn/0Ytg6CvGoE2VrO74oX8Lu4jbOPZDKxr8tzPEg=
+github.com/yyle88/syntaxgo v0.0.32 h1:4+KUvQxdZ9yhA7VAMlhOo92Ru0GUqoVkfDQTOmpxNW0=
+github.com/yyle88/syntaxgo v0.0.32/go.mod h1:/AkFNTF5MG1QJsHArT3mwlqCJlY85zAgzJ9Gfv3fAcA=
+github.com/yyle88/tern v0.0.3 h1:Ut5p1wPAVcreEkmzDp+IiteA3K2vnTeAYE1PyBLNgjU=
+github.com/yyle88/tern v0.0.3/go.mod h1:g9weyOMLtXYyt37EAshZPUTTHdH7WFauuxDi4oPr7/8=
 github.com/yyle88/zaplog v0.0.14 h1:AN7pcBbo+QsHU3jYdu6NJdhckZ5OsnCBB5Wf8xQpBz8=
 github.com/yyle88/zaplog v0.0.14/go.mod h1:EVbOBQhJ0kn7dPa7bpJs/8zEY5N6XQS9SodeojwQmdE=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=

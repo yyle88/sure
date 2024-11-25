@@ -13,7 +13,7 @@ import (
 	"github.com/yyle88/must"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_astfieldsflat"
+	"github.com/yyle88/syntaxgo/syntaxgo_astvtnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 	"github.com/yyle88/zaplog"
 	"go.uber.org/zap"
@@ -130,17 +130,17 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 		for _, mebFunc := range methods {
 			mebFuncName := syntaxgo_ast.GetNodeCode(srcCode, mebFunc.Name)
 
-			var params = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
+			var params = make(syntaxgo_astvtnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Params != nil {
-				params = syntaxgo_astfieldsflat.GetSimpleArgElements(mebFunc.Type.Params.List, srcCode)
+				params = syntaxgo_astvtnorm.GetSimpleArgElements(mebFunc.Type.Params.List, srcCode)
 
 				for _, elem := range params {
 					elem.SetPkgUsage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]int))
 				}
 			}
-			var results = make(syntaxgo_astfieldsflat.NameTypeElements, 0)
+			var results = make(syntaxgo_astvtnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Results != nil {
-				results = syntaxgo_astfieldsflat.GetSimpleResElements(mebFunc.Type.Results.List, srcCode)
+				results = syntaxgo_astvtnorm.GetSimpleResElements(mebFunc.Type.Results.List, srcCode)
 
 				for _, elem := range results {
 					elem.SetPkgUsage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]int))
