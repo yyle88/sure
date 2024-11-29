@@ -12,8 +12,9 @@ import (
 	"github.com/yyle88/formatgo"
 	"github.com/yyle88/must"
 	"github.com/yyle88/sure/internal/utils"
+	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_astvtnorm"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 	"github.com/yyle88/zaplog"
 	"go.uber.org/zap"
@@ -63,7 +64,7 @@ func Gen(cfg *Config, params ...*Param) {
 	}
 
 	//把需要 import 的包路径设置到代码里
-	source := syntaxgo_ast.AddImports(ptx.Bytes(), importOptions)
+	source := importOptions.InjectImports(ptx.Bytes())
 
 	zaplog.LOG.Debug(string(source))
 
@@ -109,7 +110,8 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 
 		srcCode := done.VAE(os.ReadFile(path)).Done()
 
-		astFile := done.VCE(syntaxgo_ast.NewAstFromSource(srcCode)).Nice()
+		astBundle := done.VCE(syntaxgo_ast.NewAstBundleV1(srcCode)).Nice()
+		astFile, _ := astBundle.GetBundle()
 		astFcXs := syntaxgo_ast.GetFunctions(astFile)
 		methods := syntaxgo_ast.GetFunctionsXRecvName(astFcXs, objectType.Name(), true)
 		if len(methods) == 0 {
@@ -128,19 +130,19 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 		srcCode := oneTmp.srcCode
 		methods := oneTmp.methods
 		for _, mebFunc := range methods {
-			mebFuncName := syntaxgo_ast.GetNodeCode(srcCode, mebFunc.Name)
+			mebFuncName := syntaxgo_astnode.GetText(srcCode, mebFunc.Name)
 
-			var params = make(syntaxgo_astvtnorm.NameTypeElements, 0)
+			var params = make(syntaxgo_aktnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Params != nil {
-				params = syntaxgo_astvtnorm.GetSimpleArgElements(mebFunc.Type.Params.List, srcCode)
+				params = syntaxgo_aktnorm.GetSimpleArgElements(mebFunc.Type.Params.List, srcCode)
 
 				for _, elem := range params {
 					elem.SetPkgUsage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]int))
 				}
 			}
-			var results = make(syntaxgo_astvtnorm.NameTypeElements, 0)
+			var results = make(syntaxgo_aktnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Results != nil {
-				results = syntaxgo_astvtnorm.GetSimpleResElements(mebFunc.Type.Results.List, srcCode)
+				results = syntaxgo_aktnorm.GetSimpleResElements(mebFunc.Type.Results.List, srcCode)
 
 				for _, elem := range results {
 					elem.SetPkgUsage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]int))

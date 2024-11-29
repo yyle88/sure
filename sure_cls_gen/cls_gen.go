@@ -14,8 +14,9 @@ import (
 	"github.com/yyle88/must"
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
+	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_astvtnorm"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
@@ -54,7 +55,7 @@ func Gen(cfg *Config, objects ...interface{}) {
 	}
 
 	//把需要 import 的包路径设置到代码里
-	source := syntaxgo_ast.AddImports(ptx.Bytes(), importOptions)
+	source := importOptions.InjectImports(ptx.Bytes())
 	//统计 format 代码的时间
 	startTime := time.Now()
 	//执行 format 时，要确保它不再去找 imports 需要引用的包，否则就会比较耗时，当你发现这里很耗时时就可以顺着这个思路排查
@@ -103,7 +104,8 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 
 		source := done.VAE(os.ReadFile(path)).Done()
 
-		astFile := done.VCE(syntaxgo_ast.NewAstFromSource(source)).Nice()
+		astBundle := done.VCE(syntaxgo_ast.NewAstBundleV1(source)).Nice()
+		astFile, _ := astBundle.GetBundle()
 		astFcXs := syntaxgo_ast.GetFunctions(astFile)
 		methods := syntaxgo_ast.GetFunctionsXRecvName(astFcXs, objectType.Name(), true)
 		if len(methods) == 0 {
@@ -134,7 +136,7 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 		source := oneTmp.srcCode
 		methods := oneTmp.methods
 		for _, mebFunc := range methods {
-			mebFuncName := syntaxgo_ast.GetNodeCode(source, mebFunc.Name)
+			mebFuncName := syntaxgo_astnode.GetText(source, mebFunc.Name)
 			if utils.In(mebFuncName, []string{string(sure.MUST), string(sure.SOFT)}) {
 				continue
 			}
@@ -142,23 +144,23 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 				continue
 			}
 
-			var params = make(syntaxgo_astvtnorm.NameTypeElements, 0)
+			var params = make(syntaxgo_aktnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Params != nil {
-				params = syntaxgo_astvtnorm.GetSimpleArgElements(mebFunc.Type.Params.List, source)
+				params = syntaxgo_aktnorm.GetSimpleArgElements(mebFunc.Type.Params.List, source)
 			}
-			var results = make(syntaxgo_astvtnorm.NameTypeElements, 0)
+			var results = make(syntaxgo_aktnorm.NameTypeElements, 0)
 			if mebFunc.Type != nil && mebFunc.Type.Results != nil {
-				results = syntaxgo_astvtnorm.GetSimpleResElements(mebFunc.Type.Results.List, source)
+				results = syntaxgo_aktnorm.GetSimpleResElements(mebFunc.Type.Results.List, source)
 			}
 
 			for _, elem := range results {
 				zaplog.LOG.Debug("elem", zap.String("name", elem.Name), zap.String("kind", elem.Kind))
 			}
 
-			var okxResElems = make(syntaxgo_astvtnorm.NameTypeElements, 0)
-			var erxResElems = make(syntaxgo_astvtnorm.NameTypeElements, 0)
+			var okxResElems = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var erxResElems = make(syntaxgo_aktnorm.NameTypeElements, 0)
 			for _, result := range results {
-				if syntaxgo_ast.GetNodeCode(source, result.Type) == "error" {
+				if syntaxgo_astnode.GetText(source, result.Type) == "error" {
 					erxResElems = append(erxResElems, result)
 				} else {
 					okxResElems = append(okxResElems, result)

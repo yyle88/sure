@@ -13,8 +13,9 @@ import (
 	"github.com/yyle88/formatgo"
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
+	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"github.com/yyle88/syntaxgo/syntaxgo_astvtnorm"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
 )
@@ -36,10 +37,12 @@ func GenerateSurePackage(t *testing.T, cfg *Config) {
 		absPath := filepath.Join(cfg.PkgRoot, name)
 		srcData := done.VAE(os.ReadFile(absPath)).Done()
 
-		astFile, err := syntaxgo_ast.NewAstXFilepath(absPath)
+		astBundle, err := syntaxgo_ast.NewAstBundleV4(absPath)
 		done.Done(err)
 
-		packageName := astFile.Name.Name
+		packageName := astBundle.GetPackageName()
+
+		astFile, _ := astBundle.GetBundle()
 
 		astFcXs := syntaxgo_ast.GetFunctions(astFile)
 
@@ -89,7 +92,7 @@ func GenerateSurePackage(t *testing.T, cfg *Config) {
 func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, sureEnum sure.SureEnum, sureUseNode string) string {
 	var res = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
-		res += syntaxgo_ast.GetNodeCode(srcData, astFunc.Type.TypeParams)
+		res += syntaxgo_astnode.GetText(srcData, astFunc.Type.TypeParams)
 	}
 	res += "("
 	var argList []string
@@ -98,10 +101,10 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 		for _, param := range astFunc.Type.Params.List {
 			if len(param.Names) == 0 {
 				argName := "arg" + strconv.Itoa(len(args))
-				args = append(args, argName+" "+syntaxgo_ast.GetNodeCode(srcData, param.Type))
+				args = append(args, argName+" "+syntaxgo_astnode.GetText(srcData, param.Type))
 				argList = append(argList, argName)
 			} else {
-				args = append(args, syntaxgo_ast.GetNodeCode(srcData, param))
+				args = append(args, syntaxgo_astnode.GetText(srcData, param))
 				for _, name := range param.Names {
 					// 检查参数是否是 "..."
 					if _, variadic := param.Type.(*ast.Ellipsis); variadic {
@@ -116,7 +119,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	}
 	res += ")"
 
-	genericsMap := syntaxgo_astvtnorm.CountGenericsMap(astFunc.Type.TypeParams)
+	genericsMap := syntaxgo_aktnorm.CountGenericsMap(astFunc.Type.TypeParams)
 
 	var isReturnErrors = false
 	{
@@ -228,7 +231,7 @@ func parseResFields(source []byte, astFunction *ast.FuncDecl) ([]*retType, bool)
 	} else {
 		var errNum int
 		for _, x := range astFunction.Type.Results.List {
-			resType := syntaxgo_ast.GetNodeCode(source, x.Type)
+			resType := syntaxgo_astnode.GetText(source, x.Type)
 			eIs := utils.Boolean(resType == "error")
 			if len(x.Names) == 0 {
 				resName := tern.BFF(eIs, func() string {
