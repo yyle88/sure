@@ -16,7 +16,7 @@ func TestGen(t *testing.T) {
 	param.SetSureNode("example5surenode.NODE")
 
 	importOptions := syntaxgo_ast.NewPackageImportOptions()
-	importOptions.SetObject(example5surenode.Node{})
+	importOptions.SetInferredObject(example5surenode.Node{})
 
 	cfg := &sure_cls_gen.Config{
 		GenParam:      param,

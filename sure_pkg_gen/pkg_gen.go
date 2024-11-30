@@ -16,6 +16,7 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
+	"github.com/yyle88/syntaxgo/syntaxgo_search"
 	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
 )
@@ -44,7 +45,7 @@ func GenerateSurePackage(t *testing.T, cfg *Config) {
 
 		astFile, _ := astBundle.GetBundle()
 
-		astFcXs := syntaxgo_ast.GetFunctions(astFile)
+		astFcXs := syntaxgo_search.ExtractFunctions(astFile)
 
 		var sliceFuncCodes []string
 		for _, astFunc := range astFcXs {
@@ -119,7 +120,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	}
 	res += ")"
 
-	genericsMap := syntaxgo_aktnorm.CountGenericsMap(astFunc.Type.TypeParams)
+	genericsMap := syntaxgo_aktnorm.GetGenericTypeParamsMap(astFunc.Type.TypeParams)
 
 	var isReturnErrors = false
 	{
@@ -198,7 +199,7 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 	return res
 }
 
-func cvtAZType(packageName string, genericsMap map[string]int, res *retType) string {
+func cvtAZType(packageName string, genericsMap map[string]ast.Expr, res *retType) string {
 	if utils.C0IsUPPER(res.Type) {
 		classType := res.Type
 		if _, ok := genericsMap[classType]; ok {

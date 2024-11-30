@@ -18,6 +18,7 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
+	"github.com/yyle88/syntaxgo/syntaxgo_search"
 	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
 	"go.uber.org/zap"
@@ -51,7 +52,7 @@ func Gen(cfg *Config, objects ...interface{}) {
 	if cfg.GenParam.SureNode != "" {
 		zaplog.LOG.Debug("use_new_sure_node", zap.String("node", cfg.GenParam.SureNode))
 	} else { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
-		importOptions.SetObject(syntaxgo_reflect.GetObject[sure.SureEnum]())
+		importOptions.SetInferredObject(syntaxgo_reflect.GetObject[sure.SureEnum]())
 	}
 
 	//把需要 import 的包路径设置到代码里
@@ -106,8 +107,8 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 
 		astBundle := done.VCE(syntaxgo_ast.NewAstBundleV1(source)).Nice()
 		astFile, _ := astBundle.GetBundle()
-		astFcXs := syntaxgo_ast.GetFunctions(astFile)
-		methods := syntaxgo_ast.GetFunctionsXRecvName(astFcXs, objectType.Name(), true)
+		astFcXs := syntaxgo_search.ExtractFunctions(astFile)
+		methods := syntaxgo_search.ExtractFunctionsByReceiverName(astFcXs, objectType.Name(), true)
 		if len(methods) == 0 {
 			continue
 		}
@@ -168,24 +169,24 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 			}
 
 			var erxHandleStmts []string
-			for _, erxName := range erxResElems.GetFunctionParamsStats() {
+			for _, erxName := range erxResElems.GenerateFunctionParams() {
 				sureNode := zerotern.VF(cfg.SureNode, sure.GetPkgName)
 
 				erxHandleStmts = append(erxHandleStmts, sureNode+"."+string(sureEnum)+"("+erxName+")")
 			}
 
 			ptx.Println(`func (T *` + subClassName + `) ` + mebFuncName + `(` +
-				params.GetNamesKindsStats().MergeParts() +
+				params.FormatNamesWithKinds().MergeParts() +
 				`)` + `(` +
-				okxResElems.GetNamesKindsStats().MergeParts() +
+				okxResElems.FormatNamesWithKinds().MergeParts() +
 				`) {`)
 
-			runFuncLine := `T.` + cfg.SubClassRecvName + `.` + mebFuncName + `(` + params.GetFunctionParamsStats().MergeParts() + `)`
+			runFuncLine := `T.` + cfg.SubClassRecvName + `.` + mebFuncName + `(` + params.GenerateFunctionParams().MergeParts() + `)`
 			if len(results) > 0 {
 				if len(okxResElems) == len(results) {
-					ptx.Println(results.GetFunctionParamsStats().MergeParts() + "=" + runFuncLine)
+					ptx.Println(results.GenerateFunctionParams().MergeParts() + "=" + runFuncLine)
 				} else {
-					ptx.Println(results.GetFunctionParamsStats().MergeParts() + ":=" + runFuncLine)
+					ptx.Println(results.GenerateFunctionParams().MergeParts() + ":=" + runFuncLine)
 				}
 			} else {
 				ptx.Println(runFuncLine)
@@ -196,7 +197,7 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 			}
 
 			if len(okxResElems) > 0 {
-				ptx.Println("return" + " " + okxResElems.GetFunctionParamsStats().MergeParts())
+				ptx.Println("return" + " " + okxResElems.GenerateFunctionParams().MergeParts())
 			}
 
 			ptx.Println("}")

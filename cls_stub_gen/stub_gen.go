@@ -16,6 +16,7 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
+	"github.com/yyle88/syntaxgo/syntaxgo_search"
 	"github.com/yyle88/zaplog"
 	"go.uber.org/zap"
 )
@@ -112,8 +113,8 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 
 		astBundle := done.VCE(syntaxgo_ast.NewAstBundleV1(srcCode)).Nice()
 		astFile, _ := astBundle.GetBundle()
-		astFcXs := syntaxgo_ast.GetFunctions(astFile)
-		methods := syntaxgo_ast.GetFunctionsXRecvName(astFcXs, objectType.Name(), true)
+		astFcXs := syntaxgo_search.ExtractFunctions(astFile)
+		methods := syntaxgo_search.ExtractFunctionsByReceiverName(astFcXs, objectType.Name(), true)
 		if len(methods) == 0 {
 			continue
 		}
@@ -137,7 +138,7 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 				params = syntaxgo_aktnorm.GetSimpleArgElements(mebFunc.Type.Params.List, srcCode)
 
 				for _, elem := range params {
-					elem.SetPkgUsage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]int))
+					elem.AdjustTypeWithPackage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]ast.Expr))
 				}
 			}
 			var results = make(syntaxgo_aktnorm.NameTypeElements, 0)
@@ -145,7 +146,7 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 				results = syntaxgo_aktnorm.GetSimpleResElements(mebFunc.Type.Results.List, srcCode)
 
 				for _, elem := range results {
-					elem.SetPkgUsage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]int))
+					elem.AdjustTypeWithPackage(syntaxgo_reflect.GetPkgNameV3(param.object), make(map[string]ast.Expr))
 				}
 			}
 
@@ -154,12 +155,12 @@ func GenerateStubFunctions(cfg *Config, param *Param) string {
 			}
 
 			ptx.Println(`func ` + mebFuncName + `(` +
-				params.GetNamesKindsStats().MergeParts() +
+				params.FormatNamesWithKinds().MergeParts() +
 				`)` + `(` +
 				strings.Join(results.Kinds(), ",") +
 				`) {`)
 
-			runFuncLine := param.opStub + `.` + mebFuncName + `(` + params.GetFunctionParamsStats().MergeParts() + `)`
+			runFuncLine := param.opStub + `.` + mebFuncName + `(` + params.GenerateFunctionParams().MergeParts() + `)`
 			if len(results) > 0 {
 				ptx.Println("return " + runFuncLine)
 			} else {
