@@ -7,12 +7,14 @@ import (
 	"slices"
 	"unicode"
 
+	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	"github.com/yyle88/done"
 	"github.com/yyle88/erero"
+	"github.com/yyle88/zaplog"
 )
 
-func Neat(v interface{}) string {
+func Neat2json(v interface{}) string {
 	data, err := NeatBytes(v)
 	if err != nil {
 		panic(errors.WithMessage(err, "wrong"))
@@ -33,14 +35,14 @@ func In[V comparable](v V, slice []V) bool {
 }
 
 func MustRoot(root string) {
-	done.VBE(IsRootExists(root)).TRUE()
+	done.VBE(IsRootExist(root)).TRUE()
 }
 
 func MustFile(path string) {
-	done.VBE(IsFileExists(path)).TRUE()
+	done.VBE(IsFileExist(path)).TRUE()
 }
 
-func IsRootExists(path string) (bool, error) {
+func IsRootExist(path string) (bool, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -51,7 +53,7 @@ func IsRootExists(path string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func IsFileExists(path string) (bool, error) {
+func IsFileExist(path string) (bool, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -80,7 +82,7 @@ func MustLs(root string) (names []string) {
 	return
 }
 
-func C0IsUPPER(s string) bool {
+func C0IsUppercase(s string) bool {
 	runes := []rune(s)
 	if len(runes) > 0 {
 		return unicode.IsUpper(runes[0])
@@ -94,4 +96,12 @@ func SetDoubleQuotes(s string) string {
 
 func Boolean(v bool) bool {
 	return v
+}
+
+func PrintObject(a any) {
+	zaplog.LOGS.P1.Debug("------------")
+	zaplog.LOGS.P1.Debug("---object---")
+	done.VNE(pretty.Println(a)).Fine()
+	zaplog.LOGS.P1.Debug("------------")
+	zaplog.LOGS.P1.Debug("------------")
 }

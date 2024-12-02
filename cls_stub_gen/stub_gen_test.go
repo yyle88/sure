@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/yyle88/runpath"
+	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 )
 
 type A struct{}
@@ -23,16 +24,16 @@ func (a *A) Sub(x int, y int) (int, error) {
 	return x - y, nil
 }
 
-func TestGen(t *testing.T) {
-	res := GenerateStubFunctions(&Config{
-		SrcRoot:       runpath.PARENT.Path(),
-		TargetPkgName: "p_p_p",
-		ImportOptions: nil,
-		TargetSrcPath: "",
-		CanCreateFile: false,
-	}, &Param{
-		object: A{},
-		opStub: "a_a_a",
-	})
+func TestGenerateMethodsStub(t *testing.T) {
+	res := GenerateStubMethods(
+		&StubGenConfig{
+			SourceRootPath:    runpath.PARENT.Path(),
+			TargetPackageName: "p_p_p",
+			ImportOptions:     syntaxgo_ast.NewPackageImportOptions(),
+			OutputPath:        "",
+			AllowFileCreation: false,
+		},
+		NewStubParam(A{}, "a_a_a"),
+	)
 	t.Log(res)
 }

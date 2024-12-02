@@ -1,7 +1,6 @@
 package sure_pkg_gen
 
 import (
-	"fmt"
 	"go/ast"
 	"os"
 	"path/filepath"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
+	"github.com/yyle88/rese"
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
@@ -21,34 +21,41 @@ import (
 	"github.com/yyle88/tern/zerotern"
 )
 
-func Gen(t *testing.T, pkgRoot string, sureEnum sure.SureEnum, pkgPath string) {
-	GenerateSurePackage(t, NewConfig(pkgRoot, sureEnum, pkgPath))
+func GenerateSurePackage(
+	t *testing.T,
+	sourceRoot string,
+	errorHandlingMode sure.ErrorHandlingMode,
+	sourcePackagePath string,
+) {
+	GenerateSurePackageFiles(t, NewSurePackageConfig(
+		sourceRoot,
+		errorHandlingMode,
+		sourcePackagePath,
+	))
 }
 
-func GenerateSurePackage(t *testing.T, cfg *Config) {
-	fmt.Println(cfg.PkgRoot, cfg.GenRoot)
+func GenerateSurePackageFiles(t *testing.T, cfg *SurePackageGenConfig) {
+	utils.PrintObject(cfg)
 
-	for _, name := range utils.MustLs(cfg.PkgRoot) {
+	for _, name := range utils.MustLs(cfg.SourceRoot) {
 		if filepath.Ext(name) != ".go" {
 			continue
 		}
 		if strings.HasSuffix(name, "_test.go") {
 			continue
 		}
-		absPath := filepath.Join(cfg.PkgRoot, name)
-		srcData := done.VAE(os.ReadFile(absPath)).Done()
-
-		astBundle, err := syntaxgo_ast.NewAstBundleV4(absPath)
-		done.Done(err)
+		absPath := filepath.Join(cfg.SourceRoot, name)
+		sourceCode := done.VAE(os.ReadFile(absPath)).Done()
+		astBundle := rese.P1(syntaxgo_ast.NewAstBundleV1(sourceCode))
 
 		packageName := astBundle.GetPackageName()
 
 		astFile, _ := astBundle.GetBundle()
 
-		astFcXs := syntaxgo_search.ExtractFunctions(astFile)
+		astFunctions := syntaxgo_search.ExtractFunctions(astFile)
 
-		var sliceFuncCodes []string
-		for _, astFunc := range astFcXs {
+		var functionCodes []string
+		for _, astFunc := range astFunctions {
 			if astFunc.Recv != nil {
 				if len(astFunc.Recv.List) > 0 && len(astFunc.Recv.List[0].Names) > 0 {
 					t.Log(astFunc.Recv.List[0].Names[0].Name, astFunc.Name.Name)
@@ -56,32 +63,33 @@ func GenerateSurePackage(t *testing.T, cfg *Config) {
 				continue
 			}
 			t.Log(astFunc.Name.Name)
-			if !utils.C0IsUPPER(astFunc.Name.Name) {
+			if !utils.C0IsUppercase(astFunc.Name.Name) {
 				continue
 			}
-			results, anonymous := parseResFields(srcData, astFunc)
-			t.Log(utils.Neat(results))
+			results := parseFunctionReturnFields(sourceCode, astFunc)
+			t.Log(utils.Neat2json(results))
 
-			sFuncCode := newFuncCode(srcData, packageName, astFunc, results, anonymous, cfg.SureEnum, cfg.SureUseNode)
-			t.Log(sFuncCode)
+			functionCode := makeFunctionCode(sourceCode, packageName, astFunc, results, cfg.ErrorHandlingMode, cfg.HandlerFuncReference)
+			t.Log(functionCode)
 
-			sliceFuncCodes = append(sliceFuncCodes, sFuncCode)
+			functionCodes = append(functionCodes, functionCode)
 		}
 
-		if len(sliceFuncCodes) > 0 {
-			shortSureName := strings.ToLower(string(cfg.SureEnum))
-			newPackageName := zerotern.VV(cfg.NewPkgName, packageName+"_"+shortSureName)
+		if len(functionCodes) > 0 {
+			shortErrorHandlingMode := strings.ToLower(string(cfg.ErrorHandlingMode))
+
+			newPackageName := zerotern.VV(cfg.NewPkgName, packageName+"_"+shortErrorHandlingMode)
 
 			ptx := utils.NewPTX()
 			ptx.Println("package" + " " + newPackageName)
 			ptx.Println("import(")
-			ptx.Println(utils.SetDoubleQuotes(cfg.PkgPath))
-			ptx.Println(utils.SetDoubleQuotes(cfg.SurePkgPath))
+			ptx.Println(utils.SetDoubleQuotes(cfg.SourcePackagePath))
+			ptx.Println(utils.SetDoubleQuotes(cfg.ErrorHandlingPkgPath))
 			ptx.Println(")")
-			ptx.Println(strings.Join(sliceFuncCodes, "\n"))
+			ptx.Println(strings.Join(functionCodes, "\n"))
 
-			newName := strings.Replace(name, ".go", "_"+shortSureName+".go", 1)
-			newPath := filepath.Join(cfg.GenRoot, newPackageName, newName)
+			newName := strings.Replace(name, ".go", "_"+shortErrorHandlingMode+".go", 1)
+			newPath := filepath.Join(cfg.OutputRoot, newPackageName, newName)
 
 			newCode, _ := formatgo.FormatCode(ptx.String())
 
@@ -90,96 +98,105 @@ func GenerateSurePackage(t *testing.T, cfg *Config) {
 	}
 }
 
-func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, results []*retType, anonymous bool, sureEnum sure.SureEnum, sureUseNode string) string {
-	var res = "func " + astFunc.Name.Name
+func makeFunctionCode(
+	sourceCode []byte,
+	packageName string,
+	astFunc *ast.FuncDecl,
+	results []*resultType,
+	errorHandlingMode sure.ErrorHandlingMode,
+	sureHandlerFuncReference string,
+) string {
+	var newFunctionCode = "func " + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
-		res += syntaxgo_astnode.GetText(srcData, astFunc.Type.TypeParams)
+		newFunctionCode += syntaxgo_astnode.GetText(sourceCode, astFunc.Type.TypeParams)
 	}
-	res += "("
-	var argList []string
+	newFunctionCode += "("
+	var argumentNames []string
 	if astFunc.Type.Params != nil && len(astFunc.Type.Params.List) > 0 {
 		var args []string
 		for _, param := range astFunc.Type.Params.List {
 			if len(param.Names) == 0 {
 				argName := "arg" + strconv.Itoa(len(args))
-				args = append(args, argName+" "+syntaxgo_astnode.GetText(srcData, param.Type))
-				argList = append(argList, argName)
+				args = append(args, argName+" "+syntaxgo_astnode.GetText(sourceCode, param.Type))
+				argumentNames = append(argumentNames, argName)
 			} else {
-				args = append(args, syntaxgo_astnode.GetText(srcData, param))
+				args = append(args, syntaxgo_astnode.GetText(sourceCode, param))
 				for _, name := range param.Names {
 					// 检查参数是否是 "..."
 					if _, variadic := param.Type.(*ast.Ellipsis); variadic {
-						argList = append(argList, name.Name+" ...")
+						argumentNames = append(argumentNames, name.Name+" ...")
 					} else {
-						argList = append(argList, name.Name)
+						argumentNames = append(argumentNames, name.Name)
 					}
 				}
 			}
 		}
-		res += strings.Join(args, ",")
+		newFunctionCode += strings.Join(args, ",")
 	}
-	res += ")"
+	newFunctionCode += ")"
 
-	genericsMap := syntaxgo_aktnorm.GetGenericTypeParamsMap(astFunc.Type.TypeParams)
+	genericTypeParams := syntaxgo_aktnorm.GetGenericTypeParamsMap(astFunc.Type.TypeParams)
 
-	var isReturnErrors = false
-	{
-		var rets = make([]string, 0, len(results))
-		if anonymous {
-			for _, res := range results {
-				if res.Type == "error" {
-					isReturnErrors = true
-					continue
-				}
-				rets = append(rets, cvtAZType(packageName, genericsMap, res))
-			}
-		} else {
-			for _, res := range results {
-				if res.Type == "error" {
-					isReturnErrors = true
-					continue
-				}
-				rets = append(rets, res.Name+" "+cvtAZType(packageName, genericsMap, res))
-			}
+	var anonymousReturn = false
+	for _, res := range results {
+		if res.IsAnonymous {
+			anonymousReturn = true
+			break
 		}
-		if len(rets) > 0 {
-			if len(rets) < 2 && anonymous {
-				res += " " + rets[0]
+	}
+
+	var containsErrorReturn = false
+	if len(results) > 0 {
+		var resultNames = make([]string, 0, len(results))
+		for _, res := range results {
+			if res.Type == "error" {
+				containsErrorReturn = true
+				continue
+			}
+			if res.IsAnonymous {
+				resultNames = append(resultNames, resolveFullExportedType(packageName, genericTypeParams, res))
 			} else {
-				res += " " + "(" + strings.Join(rets, ",") + ")"
+				resultNames = append(resultNames, res.Name+" "+resolveFullExportedType(packageName, genericTypeParams, res))
+			}
+		}
+		if len(resultNames) > 0 {
+			if len(resultNames) < 2 && anonymousReturn {
+				newFunctionCode += " " + resultNames[0]
+			} else {
+				newFunctionCode += " " + "(" + strings.Join(resultNames, ",") + ")"
 			}
 		}
 	}
-	res += " " + "{" + "\n"
+	newFunctionCode += " " + "{" + "\n"
 	if len(results) > 0 {
 		var rets = make([]string, 0, len(results))
 		for _, res := range results {
 			rets = append(rets, res.Name)
 		}
-		res += strings.Join(rets, ",")
-		if anonymous || isReturnErrors {
-			res += ":="
+		newFunctionCode += strings.Join(rets, ",")
+		if anonymousReturn || containsErrorReturn {
+			newFunctionCode += ":="
 		} else {
-			res += "="
+			newFunctionCode += "="
 		}
 	}
-	res += packageName + "." + astFunc.Name.Name
+	newFunctionCode += packageName + "." + astFunc.Name.Name
 	if astFunc.Type.TypeParams != nil {
-		res += "["
+		newFunctionCode += "["
 		var genericTypeNames []string
 		for _, xts := range astFunc.Type.TypeParams.List {
 			for _, xtx := range xts.Names {
 				genericTypeNames = append(genericTypeNames, xtx.Name)
 			}
 		}
-		res += strings.Join(genericTypeNames, ",")
-		res += "]"
+		newFunctionCode += strings.Join(genericTypeNames, ",")
+		newFunctionCode += "]"
 	}
-	res += "(" + strings.Join(argList, ",") + ")" + "\n"
+	newFunctionCode += "(" + strings.Join(argumentNames, ",") + ")" + "\n"
 	if len(results) > 0 {
 		for _, x := range results {
 			if x.Type == "error" {
-				res += sureUseNode + "." + string(sureEnum) + "(" + x.Name + ")" + "\n"
+				newFunctionCode += sureHandlerFuncReference + "." + string(errorHandlingMode) + "(" + x.Name + ")" + "\n"
 			}
 		}
 	}
@@ -192,68 +209,69 @@ func newFuncCode(srcData []byte, packageName string, astFunc *ast.FuncDecl, resu
 			rets = append(rets, res.Name)
 		}
 		if len(rets) > 0 {
-			res += "return" + " " + strings.Join(rets, ",") + "\n"
+			newFunctionCode += "return" + " " + strings.Join(rets, ",") + "\n"
 		}
 	}
-	res += "}" + "\n"
-	return res
+	newFunctionCode += "}" + "\n"
+	return newFunctionCode
 }
 
-func cvtAZType(packageName string, genericsMap map[string]ast.Expr, res *retType) string {
-	if utils.C0IsUPPER(res.Type) {
+func resolveFullExportedType(packageName string, genericTypeParams map[string]ast.Expr, res *resultType) string {
+	if utils.C0IsUppercase(res.Type) {
 		classType := res.Type
-		if _, ok := genericsMap[classType]; ok {
+		if _, ok := genericTypeParams[classType]; ok {
 			return res.Type
 		}
 		return packageName + "." + classType
 	}
 	if res.Type[0] == '*' {
 		classType := res.Type[1:]
-		if _, ok := genericsMap[classType]; ok {
+		if _, ok := genericTypeParams[classType]; ok {
 			return res.Type
 		}
-		if utils.C0IsUPPER(classType) {
+		if utils.C0IsUppercase(classType) {
 			return "*" + packageName + "." + classType
 		}
 	}
 	return res.Type
 }
 
-type retType struct {
-	Name string
-	Type string
+type resultType struct {
+	Name        string
+	Type        string
+	IsAnonymous bool
 }
 
-func parseResFields(source []byte, astFunction *ast.FuncDecl) ([]*retType, bool) {
-	var results []*retType
-	var anonymous = true
+func parseFunctionReturnFields(source []byte, astFunction *ast.FuncDecl) []*resultType {
+	var results []*resultType
 	if astFunction.Type.Results == nil || len(astFunction.Type.Results.List) == 0 {
-		results = make([]*retType, 0)
+		results = make([]*resultType, 0)
 	} else {
 		var errNum int
-		for _, x := range astFunction.Type.Results.List {
-			resType := syntaxgo_astnode.GetText(source, x.Type)
+		for _, elem := range astFunction.Type.Results.List {
+			resType := syntaxgo_astnode.GetText(source, elem.Type)
 			eIs := utils.Boolean(resType == "error")
-			if len(x.Names) == 0 {
+			if len(elem.Names) == 0 {
 				resName := tern.BFF(eIs, func() string {
 					return tern.BVV(errNum == 0, "err", "err"+strconv.Itoa(errNum))
 				}, func() string {
 					return "res" + strconv.Itoa(len(results))
 				})
 
-				results = append(results, &retType{
-					Name: resName,
-					Type: resType,
+				results = append(results, &resultType{
+					Name:        resName,
+					Type:        resType,
+					IsAnonymous: true,
 				})
 				if eIs {
 					errNum++
 				}
 			} else {
-				anonymous = false
-				for _, name := range x.Names {
-					results = append(results, &retType{
-						Name: name.Name,
-						Type: resType,
+				for _, name := range elem.Names {
+					results = append(results, &resultType{
+						Name:        name.Name,
+						Type:        resType,
+						IsAnonymous: false,
 					})
 					if eIs {
 						errNum++
@@ -262,5 +280,5 @@ func parseResFields(source []byte, astFunction *ast.FuncDecl) ([]*retType, bool)
 			}
 		}
 	}
-	return results, anonymous
+	return results
 }

@@ -5,13 +5,13 @@ import (
 	"go.uber.org/zap"
 )
 
-type SureEnum string //意思是"柔性的"、"灵活的"，是遇到错误是崩溃，还是仅仅发出告警
+type ErrorHandlingMode string //意思是"柔性的"、"灵活的"，是遇到错误是崩溃，还是仅仅发出告警
 
 //goland:noinspection GoSnakeCaseUsage
 const (
-	MUST SureEnum = "Must" //硬硬的，出错时就崩溃
-	SOFT SureEnum = "Soft" //软软的，出错时仅告警
-	OMIT SureEnum = "Omit" //忽略的，出错时无视它
+	MUST ErrorHandlingMode = "Must" //硬硬的，出错时就崩溃
+	SOFT ErrorHandlingMode = "Soft" //软软的，出错时仅告警
+	OMIT ErrorHandlingMode = "Omit" //忽略的，出错时无视它
 )
 
 // Must 硬硬的，当有err时直接panic崩溃掉，流程中止

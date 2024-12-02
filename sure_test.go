@@ -18,10 +18,12 @@ func TestMust(t *testing.T) {
 	}
 
 	example := &Example{Name: "lele"}
-	t.Log(example)
 
 	data, err := json.Marshal(example)
+
+	t.Log("-")
 	sure.Must(err) //当没有错误时就什么也不做，当出错时将 panic 崩溃
+	t.Log("-")
 
 	t.Log(string(data))
 }
@@ -29,5 +31,11 @@ func TestMust(t *testing.T) {
 func TestSoft(t *testing.T) {
 	t.Log("-")
 	sure.Soft(errors.New("wrong")) //将会告警，而且程序将继续执行
+	t.Log("-")
+}
+
+func TestOmit(t *testing.T) {
+	t.Log("-")
+	sure.Omit(errors.New("wrong")) //将会忽略，而且程序将继续执行
 	t.Log("-")
 }

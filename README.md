@@ -1,103 +1,63 @@
-# sure
-在我们开发golang代码时，经常会遇到需要判断 err 非空的情况，但这有点麻烦，因此我发明了这个包，能够在确定err不会触发时直接碾过错误。
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/yyle88/sure/release.yml?branch=main&label=BUILD)](https://github.com/yyle88/sure/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/yyle88/sure)](https://pkg.go.dev/github.com/yyle88/sure)
+[![Coverage Status](https://img.shields.io/coveralls/github/yyle88/sure/master.svg)](https://coveralls.io/github/yyle88/sure?branch=main)
+![Supported Go Versions](https://img.shields.io/badge/Go-1.22%2C%201.23-lightgrey.svg)
+[![GitHub Release](https://img.shields.io/github/release/yyle88/sure.svg)](https://github.com/yyle88/sure/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yyle88/sure)](https://goreportcard.com/report/github.com/yyle88/sure)
 
-比如在
-```
-res, err := a.Run()
-if err != nil {
-    panic(err)
-}
-```
-这个场景里，假如主逻辑不能运行，panic 有助于定位问题，让服务快速崩溃有助于外部检测，即时重启。
+# sure: Add Assertions and Crash Handling to Existing Go Code
 
-或者在
-```
-cfg, err := config.LoadFromFile(path)
-if err != nil {
-    panic(err)
-}
-```
-这个场景里，假如读取配置报错，则系统已无法靠自身逻辑恢复，直接 panic，以便于运维同事发现问题。
+`sure` enhances your existing Go code by adding assertions and crash handling. It automatically asserts conditions and crashes when errors occur, allowing you to improve error handling in legacy code without needing to manually add repetitive checks.
 
-这时假如使用
-```
-res := a_must.Run() //假设 a 是个包，而通过 a 包能得到 a_must 包，在里面自带出错时 panic 的函数。
-```
-或者
-```
-res := a.Must().Run() //假设 a 是个对象，能通过 A 类得到 AMust 类，里面自带出错时 panic 的方法。
-``` 
-就能避免频繁的判断 if err != nil 让程序变得更丝滑。
+## CHINESE README
 
-这种丝滑是指可以让代码维持链式调用。
+[中文说明](README.zh.md)
 
-比如原本的：
-```
-res, err := opt.GetR()
-if err != nil {
-    panic(err)
-}
-abc, err := res.GetA()
-if err != nil {
-    panic(err)
-}
-xyz, err := abc.GetX()
-if err != nil {
-    panic(err)
-}
-```
-就可以写成这样的语句:
-```
-xyz := opt.Must().GetR().Must().GetA().Must().GetX()
-```
-这就比每次调用完判断是否有 error 简单些，在略微非正式的情况下是无妨的。
+## CREATION_IDEAS
 
-这个包的目的就是提供这样的便利。
+[CREATION_IDEAS](internal/docs/CREATION_IDEAS.en.md)
 
-# 提供类和包两种情况下的 sure 操作
-有的方法是某个类的成员方法，比如 `param.Check()`，当参数不正确时报错，当联调结束以后参数基本都是对的，即使出错 panic 也没问题。
+## Packages Overview
 
-而有的函数是某个包的小函数，比如 `json.Marshal` 函数，它就几乎不会出错(除非传个接口给它)，经常需要判断err是否非空，其实没必要。
+### `sure_cls_gen`: **Generates Go Classes with Assertions**
 
-因此对于类和包，两种情况我做了两个生成器。
+Generates Go classes from predefined objects, embedding assertion logic to prevent common errors.
 
-## 类操作代码生成器
-假设我们封装了个类 A 它有:
-```
-GetConfig(path string) (Config, error)
-```
-就简单地封装这个操作为这样:
-```
-cfg := a.Must().GetConfig(cfgPath)
-```
-这样岂不是非常方便，这就是“类操作生成器”的基本逻辑，就是把类中所有导出方法都在遇到 err 时 panic，在调用时就能省去判断逻辑。
+### `sure_pkg_gen`: **Generates Go Packages with Error Handling**
 
-详情见 demos:
+Extracts functions from existing code and generates Go packages, integrating assertion and crash handling.
 
-[Demo1](/internal/examples/example1)
+### `cls_stub_gen`: **Generates Go Method Stubs with Assertions**
 
-[Demo4](/internal/examples/example4)
+Generates method stubs for Go objects, embedding assertions for proper error handling.
 
-[Demo5](/internal/examples/example5)
+## Usage
 
-## 包操作代码生成器
-假如封装的函数在 `utils` 包里，常规的调用是这样的:
-```
-cfg, err := utils.GetConfig(cfgPath)
-```
-经过代码生成以后会得到 `utils_must` 新包，调用就被简化为这样:
-```
-cfg := utils_must.GetConfig(cfgPath)
-```
+### Examples:
 
-详情见 demos:
+- [sure_cls_gen](internal/examples/example_sure_cls_gen)
+- [sure_pkg_gen](internal/examples/example_sure_pkg_gen)
+- [cls_stub_gen](internal/examples/example_cls_stub_gen)
 
-[Demo2](/internal/examples/example2)
+---
 
-[Demo3](/internal/examples/example3)
+## License
 
-## 思路
-[创作背景](/internal/docs/CREATION_IDEAS.md)
+`sure` is open-source and released under the MIT License. See the LICENSE file for more information.
 
-## 最终:
+---
+
+## Support
+
+Welcome to contribute to this project by submitting pull requests or reporting issues.
+
+If you find this package helpful, give it a star on GitHub!
+
+**Thank you for your support!**
+
+**Happy Coding with `sure`!** 🎉
+
 Give me stars. Thank you!!!
+
+## See stars
+[![see stars](https://starchart.cc/yyle88/sure.svg?variant=adaptive)](https://starchart.cc/yyle88/sure)

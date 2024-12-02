@@ -2,7 +2,6 @@ package sure_cls_gen
 
 import (
 	"fmt"
-	"go/ast"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -24,23 +23,25 @@ import (
 	"go.uber.org/zap"
 )
 
-type Config struct {
-	GenParam      *GenParam
-	PkgName       string
-	ImportOptions *syntaxgo_ast.PackageImportOptions
-	SrcPath       string
+type ClassGenConfig struct {
+	ClassGenOptions *ClassGenOptions
+	PackageName     string
+	ImportOptions   *syntaxgo_ast.PackageImportOptions
+	OutputPath      string
 }
 
-func Gen(cfg *Config, objects ...interface{}) {
-	must.Nice(cfg.GenParam.SrcRoot)
-	must.Nice(cfg.PkgName)
-	must.Nice(cfg.SrcPath)
+func GenerateClasses(cfg *ClassGenConfig, objects ...interface{}) {
+	utils.PrintObject(cfg)
+
+	must.Nice(cfg.ClassGenOptions.SourceRootPath)
+	must.Nice(cfg.PackageName)
+	must.Nice(cfg.OutputPath)
 
 	ptx := utils.NewPTX()
-	ptx.Println("package", cfg.PkgName)
+	ptx.Println("package", cfg.PackageName)
 
 	for _, object := range objects {
-		ptx.Println(GenerateSureClassCode(cfg.GenParam, object))
+		ptx.Println(GenerateClassCodeWithErrorHandling(cfg.ClassGenOptions, object))
 	}
 
 	var importOptions *syntaxgo_ast.PackageImportOptions
@@ -49,155 +50,161 @@ func Gen(cfg *Config, objects ...interface{}) {
 	} else {
 		importOptions = &syntaxgo_ast.PackageImportOptions{}
 	}
-	if cfg.GenParam.SureNode != "" {
-		zaplog.LOG.Debug("use_new_sure_node", zap.String("node", cfg.GenParam.SureNode))
+	if cfg.ClassGenOptions.ErrorHandlerFuncName != "" {
+		zaplog.LOG.Debug("use_new_sure_node", zap.String("node", cfg.ClassGenOptions.ErrorHandlerFuncName))
 	} else { //表示使用的默认的 Must 和 Soft 函数，就说明你是需要引用这个包，补上有利于format代码
-		importOptions.SetInferredObject(syntaxgo_reflect.GetObject[sure.SureEnum]())
+		importOptions.SetInferredObject(syntaxgo_reflect.GetObject[sure.ErrorHandlingMode]())
 	}
 
 	//把需要 import 的包路径设置到代码里
 	source := importOptions.InjectImports(ptx.Bytes())
 	//统计 format 代码的时间
-	startTime := time.Now()
+	sinceTime := time.Now()
 	//执行 format 时，要确保它不再去找 imports 需要引用的包，否则就会比较耗时，当你发现这里很耗时时就可以顺着这个思路排查
 	newSource := done.VAE(formatgo.FormatBytes(source)).Nice()
 	//把格式化后的代码写到对应的文件路径里
-	duration := time.Since(startTime)
+	duration := time.Since(sinceTime)
 	zaplog.LOG.Debug("gen", zap.Duration("format_cost_duration", duration))
-	if cfg.SrcPath != "" {
-		done.Done(utils.WriteFile(cfg.SrcPath, newSource))
+	if cfg.OutputPath != "" {
+		done.Done(utils.WriteFile(cfg.OutputPath, newSource))
 	} else {
 		fmt.Println(newSource)
 	}
 	zaplog.LOG.Debug("gen_success")
 }
 
-func GenerateSureClassCode(cfg *GenParam, object interface{}) string {
+func GenerateClassCodeWithErrorHandling(cfg *ClassGenOptions, object interface{}) string {
+	utils.PrintObject(cfg)
+
 	ptx := utils.NewPTX()
-	for _, sureEnum := range cfg.GetSureEnums() {
-		ptx.Println(GenerateSureClassOnce(cfg, object, sureEnum))
+	for _, errorHandlingMode := range cfg.GetErrorHandlingModes() {
+		ptx.Println(GenerateClassWithErrorHandlingMode(cfg, object, errorHandlingMode))
 	}
 	return ptx.String()
 }
 
-func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.SureEnum) string {
+func GenerateClassWithErrorHandlingMode(cfg *ClassGenOptions, object interface{}, errorHandlingMode sure.ErrorHandlingMode) string {
+	utils.PrintObject(cfg)
+
 	objectType := reflect.TypeOf(object)
 	zaplog.LOG.Debug(must.Nice(objectType.Name()))
 	zaplog.LOG.Debug(must.Nice(objectType.String()))
 	zaplog.LOG.Debug(must.Nice(objectType.PkgPath()))
 
-	utils.MustRoot(cfg.SrcRoot)
+	utils.MustRoot(cfg.SourceRootPath)
 
-	if len(cfg.SureEnums) == 0 { //当不填的时候就只能是默认的这两个枚举，而当填的时候允许开发者自定义别的
-		must.True(sureEnum == sure.MUST || sureEnum == sure.SOFT)
+	if len(cfg.ErrorHandlingModes) == 0 { //当不填的时候就只能是默认的这两个枚举，而当填的时候允许开发者自定义别的
+		must.True(errorHandlingMode == sure.MUST || errorHandlingMode == sure.SOFT)
 	}
 
-	var astTuples = make(srcFnsTuples, 0)
-	for _, subInfo := range done.VAE(os.ReadDir(cfg.SrcRoot)).Done() {
-		if subInfo.IsDir() {
+	var sourceMethodsTuples = make(utils.SourceMethodsTuples, 0)
+	for _, fileInfo := range done.VAE(os.ReadDir(cfg.SourceRootPath)).Done() {
+		if fileInfo.IsDir() {
 			continue
 		}
-		if !(filepath.Ext(subInfo.Name()) == ".go") {
+		if !(filepath.Ext(fileInfo.Name()) == ".go") {
 			continue
 		}
-		path := filepath.Join(cfg.SrcRoot, subInfo.Name())
+		path := filepath.Join(cfg.SourceRootPath, fileInfo.Name())
 		zaplog.LOG.Debug(path)
 
-		source := done.VAE(os.ReadFile(path)).Done()
+		sourceCode := done.VAE(os.ReadFile(path)).Done()
 
-		astBundle := done.VCE(syntaxgo_ast.NewAstBundleV1(source)).Nice()
+		astBundle := done.VCE(syntaxgo_ast.NewAstBundleV1(sourceCode)).Nice()
+
 		astFile, _ := astBundle.GetBundle()
-		astFcXs := syntaxgo_search.ExtractFunctions(astFile)
-		methods := syntaxgo_search.ExtractFunctionsByReceiverName(astFcXs, objectType.Name(), true)
-		if len(methods) == 0 {
+
+		extractedFunctions := syntaxgo_search.ExtractFunctions(astFile)
+		methodList := syntaxgo_search.ExtractFunctionsByReceiverName(extractedFunctions, objectType.Name(), true)
+		if len(methodList) == 0 {
 			continue
 		}
 
-		astTuples = append(astTuples, &srcFnsTuple{
-			srcCode: source,
-			methods: methods,
+		sourceMethodsTuples = append(sourceMethodsTuples, &utils.SourceMethodsTuple{
+			SourceCode: sourceCode,
+			MethodList: methodList,
 		})
 	}
 
 	// when zero - set a new value
-	zerotern.PF(&cfg.SubClassRecvName, func() string {
-		return zerotern.VV(astTuples.GetRecvName(), "T")
+	zerotern.PF(&cfg.ReceiverVariableName, func() string {
+		return zerotern.VV(sourceMethodsTuples.GetReceiverVariableName(), "T")
 	})
 
-	subClassName := cfg.makeClassName(reflect.TypeOf(object), sureEnum)
+	newClassName := cfg.GenerateNewClassName(reflect.TypeOf(object), errorHandlingMode)
 
 	ptx := utils.NewPTX()
-	ptx.Println(`type ` + subClassName + ` struct{` + cfg.SubClassRecvName + ` *` + objectType.Name() + `}`)
+	ptx.Println(`type ` + newClassName + ` struct{` + cfg.ReceiverVariableName + ` *` + objectType.Name() + `}`)
 	ptx.Println(`
-		func(` + cfg.SubClassRecvName + ` *` + objectType.Name() + `) ` + string(sureEnum) + `() * ` + subClassName + `{
-		return & ` + subClassName + `{` + cfg.SubClassRecvName + `:` + cfg.SubClassRecvName + `}
+		func(` + cfg.ReceiverVariableName + ` *` + objectType.Name() + `) ` + string(errorHandlingMode) + `() * ` + newClassName + `{
+		return & ` + newClassName + `{` + cfg.ReceiverVariableName + `:` + cfg.ReceiverVariableName + `}
 	}`)
 
-	for _, oneTmp := range astTuples {
-		source := oneTmp.srcCode
-		methods := oneTmp.methods
-		for _, mebFunc := range methods {
-			mebFuncName := syntaxgo_astnode.GetText(source, mebFunc.Name)
-			if utils.In(mebFuncName, []string{string(sure.MUST), string(sure.SOFT)}) {
+	for _, sourceMethodsTuple := range sourceMethodsTuples {
+		sourceCode := sourceMethodsTuple.SourceCode
+		methodList := sourceMethodsTuple.MethodList
+		for _, methodFunc := range methodList {
+			methodName := syntaxgo_astnode.GetText(sourceCode, methodFunc.Name)
+			if utils.In(methodName, []string{string(sure.MUST), string(sure.SOFT)}) {
 				continue
 			}
-			if utils.In(sure.SureEnum(mebFuncName), cfg.SureEnums) {
+			if utils.In(sure.ErrorHandlingMode(methodName), cfg.ErrorHandlingModes) {
 				continue
 			}
 
 			var params = make(syntaxgo_aktnorm.NameTypeElements, 0)
-			if mebFunc.Type != nil && mebFunc.Type.Params != nil {
-				params = syntaxgo_aktnorm.GetSimpleArgElements(mebFunc.Type.Params.List, source)
+			if methodFunc.Type != nil && methodFunc.Type.Params != nil {
+				params = syntaxgo_aktnorm.GetSimpleArgElements(methodFunc.Type.Params.List, sourceCode)
 			}
 			var results = make(syntaxgo_aktnorm.NameTypeElements, 0)
-			if mebFunc.Type != nil && mebFunc.Type.Results != nil {
-				results = syntaxgo_aktnorm.GetSimpleResElements(mebFunc.Type.Results.List, source)
+			if methodFunc.Type != nil && methodFunc.Type.Results != nil {
+				results = syntaxgo_aktnorm.GetSimpleResElements(methodFunc.Type.Results.List, sourceCode)
 			}
 
 			for _, elem := range results {
 				zaplog.LOG.Debug("elem", zap.String("name", elem.Name), zap.String("kind", elem.Kind))
 			}
 
-			var okxResElems = make(syntaxgo_aktnorm.NameTypeElements, 0)
-			var erxResElems = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var rightResultElements = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var errorResultElements = make(syntaxgo_aktnorm.NameTypeElements, 0)
 			for _, result := range results {
-				if syntaxgo_astnode.GetText(source, result.Type) == "error" {
-					erxResElems = append(erxResElems, result)
+				if syntaxgo_astnode.GetText(sourceCode, result.Type) == "error" {
+					errorResultElements = append(errorResultElements, result)
 				} else {
-					okxResElems = append(okxResElems, result)
+					rightResultElements = append(rightResultElements, result)
 				}
 			}
 
-			var erxHandleStmts []string
-			for _, erxName := range erxResElems.GenerateFunctionParams() {
-				sureNode := zerotern.VF(cfg.SureNode, sure.GetPkgName)
+			var errorHandlingStatements []string
+			for _, erxName := range errorResultElements.GenerateFunctionParams() {
+				sureNode := zerotern.VF(cfg.ErrorHandlerFuncName, sure.GetPkgName)
 
-				erxHandleStmts = append(erxHandleStmts, sureNode+"."+string(sureEnum)+"("+erxName+")")
+				errorHandlingStatements = append(errorHandlingStatements, sureNode+"."+string(errorHandlingMode)+"("+erxName+")")
 			}
 
-			ptx.Println(`func (T *` + subClassName + `) ` + mebFuncName + `(` +
+			ptx.Println(`func (T *` + newClassName + `) ` + methodName + `(` +
 				params.FormatNamesWithKinds().MergeParts() +
 				`)` + `(` +
-				okxResElems.FormatNamesWithKinds().MergeParts() +
+				rightResultElements.FormatNamesWithKinds().MergeParts() +
 				`) {`)
 
-			runFuncLine := `T.` + cfg.SubClassRecvName + `.` + mebFuncName + `(` + params.GenerateFunctionParams().MergeParts() + `)`
+			methodInvocationStatement := `T.` + cfg.ReceiverVariableName + `.` + methodName + `(` + params.GenerateFunctionParams().MergeParts() + `)`
 			if len(results) > 0 {
-				if len(okxResElems) == len(results) {
-					ptx.Println(results.GenerateFunctionParams().MergeParts() + "=" + runFuncLine)
+				if len(rightResultElements) == len(results) {
+					ptx.Println(results.GenerateFunctionParams().MergeParts() + "=" + methodInvocationStatement)
 				} else {
-					ptx.Println(results.GenerateFunctionParams().MergeParts() + ":=" + runFuncLine)
+					ptx.Println(results.GenerateFunctionParams().MergeParts() + ":=" + methodInvocationStatement)
 				}
 			} else {
-				ptx.Println(runFuncLine)
+				ptx.Println(methodInvocationStatement)
 			}
 
-			if len(erxHandleStmts) > 0 {
-				ptx.Println(strings.Join(erxHandleStmts, "\n"))
+			if len(errorHandlingStatements) > 0 {
+				ptx.Println(strings.Join(errorHandlingStatements, "\n"))
 			}
 
-			if len(okxResElems) > 0 {
-				ptx.Println("return" + " " + okxResElems.GenerateFunctionParams().MergeParts())
+			if len(rightResultElements) > 0 {
+				ptx.Println("return" + " " + rightResultElements.GenerateFunctionParams().MergeParts())
 			}
 
 			ptx.Println("}")
@@ -206,32 +213,4 @@ func GenerateSureClassOnce(cfg *GenParam, object interface{}, sureEnum sure.Sure
 	res := ptx.String()
 	zaplog.LOG.Debug(res)
 	return res
-}
-
-type srcFnsTuple struct {
-	srcCode []byte
-	methods []*ast.FuncDecl
-}
-
-type srcFnsTuples []*srcFnsTuple
-
-func (vs srcFnsTuples) GetRecvName() string {
-	for _, oneTmp := range vs {
-		for _, mebFunction := range oneTmp.methods {
-			if mebFunction.Recv == nil {
-				continue
-			}
-			if len(mebFunction.Recv.List) == 0 {
-				continue
-			}
-			if len(mebFunction.Recv.List[0].Names) == 0 {
-				continue
-			}
-			name := mebFunction.Recv.List[0].Names[0].Name
-			if name != "" {
-				return name
-			}
-		}
-	}
-	return ""
 }

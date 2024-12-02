@@ -4,13 +4,18 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/yyle88/sure/internal/examples/example1"
-	"github.com/yyle88/sure/internal/examples/example2/example2_must"
-	"github.com/yyle88/sure/internal/examples/example2/example2_soft"
-	"github.com/yyle88/sure/internal/examples/example3/example3_must"
-	"github.com/yyle88/sure/internal/examples/example3/example3_soft"
-	"github.com/yyle88/sure/internal/examples/example4"
+	"github.com/yyle88/sure/internal/examples/example_sure_cls_gen/example1"
+	"github.com/yyle88/sure/internal/examples/example_sure_cls_gen/example4"
+	"github.com/yyle88/sure/internal/examples/example_sure_pkg_gen/example2/example2_must"
+	"github.com/yyle88/sure/internal/examples/example_sure_pkg_gen/example2/example2_soft"
+	"github.com/yyle88/sure/internal/examples/example_sure_pkg_gen/example3/example3_must"
+	"github.com/yyle88/sure/internal/examples/example_sure_pkg_gen/example3/example3_soft"
 )
+
+func TestExample0(t *testing.T) {
+	res := Example0()
+	t.Log(res)
+}
 
 func TestExample1(t *testing.T) {
 	//当你要操作的是个对象时，你就可以赋予这个对象 Must 和 Soft 的能力，Must表示出错时崩溃，而Soft表示出错是仅仅告警但流程继续
