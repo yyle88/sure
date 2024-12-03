@@ -41,7 +41,7 @@ type StubGenConfig struct {
 	AllowFileCreation bool //当目标文件不存在时，能否能新建文件，假如设置为不能，就必须得找到文件才能写内容
 }
 
-func GenerateStubsFile(config *StubGenConfig, stubParams ...*StubParam) {
+func GenerateStubs(config *StubGenConfig, stubParams ...*StubParam) {
 	utils.PrintObject(config)
 
 	must.Nice(config.SourceRootPath)

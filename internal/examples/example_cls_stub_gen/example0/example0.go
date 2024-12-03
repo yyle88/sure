@@ -1,6 +1,7 @@
-package example0node
+package example0
 
-var NODE = &A{}
+var STUB1 = &A{}
+var STUB2 = &A{}
 
 type A struct{}
 
