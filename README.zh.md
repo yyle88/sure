@@ -22,15 +22,15 @@
 
 ### `cls_stub_gen`: **生成带有断言的 Go 方法存根**
 
-给 Go 对象生成方法存根，再嵌入断言以确保适当的错误处理。
+给 Go 类型创建封装单例结构体方法的包级函数，简化访问使用。。
 
 ## 使用示例
 
 ### 示例：
 
-- [sure_cls_gen](internal/examples/example_sure_cls_gen)
-- [sure_pkg_gen](internal/examples/example_sure_pkg_gen)
-- [cls_stub_gen](internal/examples/example_cls_stub_gen)
+- [使用 `sure_cls_gen` 生成类](internal/examples/example_sure_cls_gen)
+- [使用 `sure_pkg_gen` 生成包](internal/examples/example_sure_pkg_gen)
+- [使用 `cls_stub_gen` 生成单例](internal/examples/example_cls_stub_gen)
 
 ---
 

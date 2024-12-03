@@ -1,6 +1,7 @@
 package cls_stub_gen
 
 import (
+	"github.com/pkg/errors"
 	"testing"
 
 	"github.com/yyle88/runpath"
@@ -13,7 +14,8 @@ func (a *A) Get() *A {
 	return a
 }
 
-func (a *A) Set(string) {
+func (a *A) Set(string) error {
+	return errors.New("not implement")
 }
 
 func (a *A) Add(x int, y int) int {
@@ -33,7 +35,7 @@ func TestGenerateMethodsStub(t *testing.T) {
 			OutputPath:        "",
 			AllowFileCreation: false,
 		},
-		NewStubParam(A{}, "a_a_a"),
+		NewStubParam(A{}, "singletonInstance"),
 	)
 	t.Log(res)
 }

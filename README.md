@@ -27,17 +27,17 @@ Generates Go classes from predefined objects, embedding assertion logic to preve
 
 Extracts functions from existing code and generates Go packages, integrating assertion and crash handling.
 
-### `cls_stub_gen`: **Generates Go Method Stubs with Assertions**
+### `cls_stub_gen`: **Generates Package-Level Function Wrappers**
 
-Generates method stubs for Go objects, embedding assertions for proper error handling.
+Creates package-level functions that wrap methods of a singleton struct, simplifying access usage.
 
 ## Usage
 
 ### Examples:
 
-- [sure_cls_gen](internal/examples/example_sure_cls_gen)
-- [sure_pkg_gen](internal/examples/example_sure_pkg_gen)
-- [cls_stub_gen](internal/examples/example_cls_stub_gen)
+- [Generating Classes with `sure_cls_gen`](internal/examples/example_sure_cls_gen)
+- [Generating Packages with `sure_pkg_gen`](internal/examples/example_sure_pkg_gen)
+- [Generating Singleton with `cls_stub_gen`](internal/examples/example_cls_stub_gen)
 
 ---
 
