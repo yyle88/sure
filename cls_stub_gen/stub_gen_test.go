@@ -30,7 +30,7 @@ type Param struct{}
 
 func (a *A) Who(param ...Param) {}
 
-func (a *A) How(param ...Param) {}
+func (a *A) How(param ...*Param) {}
 
 func TestGenerateMethodsStub(t *testing.T) {
 	res := GenerateStubMethods(

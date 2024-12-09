@@ -17,6 +17,6 @@ func Sub(x int, y int) (int, error) {
 func Who(param ...example0.Param) {
 	example0.STUB2.Who(param...)
 }
-func How(param ...example0.Param) {
+func How(param ...*example0.Param) {
 	example0.STUB2.How(param...)
 }
