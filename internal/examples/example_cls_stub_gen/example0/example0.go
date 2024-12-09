@@ -19,3 +19,9 @@ func (a *A) Add(x int, y int) int {
 func (a *A) Sub(x int, y int) (int, error) {
 	return x - y, nil
 }
+
+type Param struct{}
+
+func (a *A) Who(param ...Param) {}
+
+func (a *A) How(param ...Param) {}

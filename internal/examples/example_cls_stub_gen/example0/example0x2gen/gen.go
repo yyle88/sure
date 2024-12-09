@@ -14,3 +14,9 @@ func Add(x int, y int) int {
 func Sub(x int, y int) (int, error) {
 	return example0.STUB2.Sub(x, y)
 }
+func Who(param ...example0.Param) {
+	example0.STUB2.Who(param...)
+}
+func How(param ...example0.Param) {
+	example0.STUB2.How(param...)
+}

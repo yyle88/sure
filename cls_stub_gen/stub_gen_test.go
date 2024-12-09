@@ -1,9 +1,9 @@
 package cls_stub_gen
 
 import (
-	"github.com/pkg/errors"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 )
@@ -25,6 +25,12 @@ func (a *A) Add(x int, y int) int {
 func (a *A) Sub(x int, y int) (int, error) {
 	return x - y, nil
 }
+
+type Param struct{}
+
+func (a *A) Who(param ...Param) {}
+
+func (a *A) How(param ...Param) {}
 
 func TestGenerateMethodsStub(t *testing.T) {
 	res := GenerateStubMethods(
