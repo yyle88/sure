@@ -127,7 +127,7 @@ func GenerateClassWithErrorHandlingMode(cfg *ClassGenOptions, object interface{}
 	}
 
 	// when zero - set a new value
-	zerotern.PF(&cfg.ReceiverVariableName, func() string {
+	zerotern.SetPF(&cfg.ReceiverVariableName, func() string {
 		return zerotern.VV(sourceMethodsTuples.GetReceiverVariableName(), "T")
 	})
 
