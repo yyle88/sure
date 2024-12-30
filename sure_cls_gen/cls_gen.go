@@ -176,10 +176,10 @@ func GenerateClassWithErrorHandlingMode(cfg *ClassGenOptions, object interface{}
 			}
 
 			var errorHandlingStatements []string
-			for _, erxName := range errorResultElements.GenerateFunctionParams() {
+			for _, errName := range errorResultElements.GenerateFunctionParams() {
 				sureNode := zerotern.VF(cfg.ErrorHandlerFuncName, sure.GetPkgName)
 
-				errorHandlingStatements = append(errorHandlingStatements, sureNode+"."+string(errorHandlingMode)+"("+erxName+")")
+				errorHandlingStatements = append(errorHandlingStatements, sureNode+"."+string(errorHandlingMode)+"("+errName+")")
 			}
 
 			ptx.Println(`func (T *` + newClassName + `) ` + methodName + `(` +
