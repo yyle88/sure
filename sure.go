@@ -17,14 +17,14 @@ const (
 // Must 硬硬的，当有err时直接panic崩溃掉，流程中止
 func Must(err error) {
 	if err != nil {
-		zaplog.LOGS.P1.Panic("must", zap.Error(err))
+		zaplog.LOGS.Skip1.Panic("must", zap.Error(err))
 	}
 }
 
 // Soft 软软的，当有err时只打印个告警日志，流程继续
 func Soft(err error) {
 	if err != nil {
-		zaplog.LOGS.P1.Warn("soft", zap.Error(err))
+		zaplog.LOGS.Skip1.Warn("soft", zap.Error(err))
 	}
 }
 

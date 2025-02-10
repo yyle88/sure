@@ -99,9 +99,9 @@ func Boolean(v bool) bool {
 }
 
 func PrintObject(a any) {
-	zaplog.LOGS.P1.Debug("------------")
-	zaplog.LOGS.P1.Debug("---object---")
+	zaplog.LOGS.Skip1.Debug("------------")
+	zaplog.LOGS.Skip1.Debug("---object---")
 	done.VNE(pretty.Println(a)).Fine()
-	zaplog.LOGS.P1.Debug("------------")
-	zaplog.LOGS.P1.Debug("------------")
+	zaplog.LOGS.Skip1.Debug("------------")
+	zaplog.LOGS.Skip1.Debug("------------")
 }
