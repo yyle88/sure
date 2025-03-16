@@ -13,9 +13,9 @@ import (
 	"github.com/yyle88/must"
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
-	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 	"github.com/yyle88/syntaxgo/syntaxgo_search"
 	"github.com/yyle88/tern/zerotern"
@@ -152,21 +152,21 @@ func GenerateClassWithErrorHandlingMode(cfg *ClassGenOptions, object interface{}
 				continue
 			}
 
-			var params = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var params = make(syntaxgo_astnorm.NameTypeElements, 0)
 			if methodFunc.Type != nil && methodFunc.Type.Params != nil {
-				params = syntaxgo_aktnorm.GetSimpleArgElements(methodFunc.Type.Params.List, sourceCode)
+				params = syntaxgo_astnorm.GetSimpleArgElements(methodFunc.Type.Params.List, sourceCode)
 			}
-			var results = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var results = make(syntaxgo_astnorm.NameTypeElements, 0)
 			if methodFunc.Type != nil && methodFunc.Type.Results != nil {
-				results = syntaxgo_aktnorm.GetSimpleResElements(methodFunc.Type.Results.List, sourceCode)
+				results = syntaxgo_astnorm.GetSimpleResElements(methodFunc.Type.Results.List, sourceCode)
 			}
 
 			for _, elem := range results {
 				zaplog.LOG.Debug("elem", zap.String("name", elem.Name), zap.String("kind", elem.Kind))
 			}
 
-			var rightResultElements = make(syntaxgo_aktnorm.NameTypeElements, 0)
-			var errorResultElements = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var rightResultElements = make(syntaxgo_astnorm.NameTypeElements, 0)
+			var errorResultElements = make(syntaxgo_astnorm.NameTypeElements, 0)
 			for _, result := range results {
 				if syntaxgo_astnode.GetText(sourceCode, result.Type) == "error" {
 					errorResultElements = append(errorResultElements, result)

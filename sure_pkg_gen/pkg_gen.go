@@ -14,9 +14,9 @@ import (
 	"github.com/yyle88/sure"
 	"github.com/yyle88/sure/internal/utils"
 	"github.com/yyle88/syntaxgo"
-	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_search"
 	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
@@ -122,7 +122,7 @@ func makeFunctionCode(
 		newFunctionCode += syntaxgo_astnode.GetText(sourceCode, astFunc.Type.TypeParams)
 	}
 
-	genericTypeParams := syntaxgo_aktnorm.GetGenericTypeParamsMap(astFunc.Type.TypeParams)
+	genericTypeParams := syntaxgo_astnorm.GetGenericTypeParamsMap(astFunc.Type.TypeParams)
 
 	newFunctionCode += "("
 	var argumentNames []string

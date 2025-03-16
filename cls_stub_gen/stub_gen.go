@@ -12,9 +12,9 @@ import (
 	"github.com/yyle88/formatgo"
 	"github.com/yyle88/must"
 	"github.com/yyle88/sure/internal/utils"
-	"github.com/yyle88/syntaxgo/syntaxgo_aktnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnorm"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 	"github.com/yyle88/syntaxgo/syntaxgo_search"
 	"github.com/yyle88/zaplog"
@@ -139,17 +139,17 @@ func GenerateStubMethods(cfg *StubGenConfig, stubParam *StubParam) string {
 		for _, methodFunction := range methodList {
 			methodName := syntaxgo_astnode.GetText(sourceCode, methodFunction.Name)
 
-			var methodParameters = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var methodParameters = make(syntaxgo_astnorm.NameTypeElements, 0)
 			if methodFunction.Type != nil && methodFunction.Type.Params != nil {
-				methodParameters = syntaxgo_aktnorm.GetSimpleArgElements(methodFunction.Type.Params.List, sourceCode)
+				methodParameters = syntaxgo_astnorm.GetSimpleArgElements(methodFunction.Type.Params.List, sourceCode)
 
 				for _, elem := range methodParameters {
 					elem.AdjustTypeWithPackage(syntaxgo_reflect.GetPkgNameV3(stubParam.object), make(map[string]ast.Expr))
 				}
 			}
-			var returnValues = make(syntaxgo_aktnorm.NameTypeElements, 0)
+			var returnValues = make(syntaxgo_astnorm.NameTypeElements, 0)
 			if methodFunction.Type != nil && methodFunction.Type.Results != nil {
-				returnValues = syntaxgo_aktnorm.GetSimpleResElements(methodFunction.Type.Results.List, sourceCode)
+				returnValues = syntaxgo_astnorm.GetSimpleResElements(methodFunction.Type.Results.List, sourceCode)
 
 				for _, elem := range returnValues {
 					elem.AdjustTypeWithPackage(syntaxgo_reflect.GetPkgNameV3(stubParam.object), make(map[string]ast.Expr))
