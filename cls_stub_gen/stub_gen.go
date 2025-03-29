@@ -87,7 +87,7 @@ func GenerateStubs(config *StubGenConfig, stubParams ...*StubParam) {
 		}
 		done.Done(utils.WriteFile(config.OutputPath, newSource))
 	} else {
-		fmt.Println(newSource)
+		fmt.Println(string(newSource))
 	}
 	zaplog.LOG.Debug("gen_success")
 }
@@ -107,7 +107,7 @@ func GenerateStubMethods(cfg *StubGenConfig, stubParam *StubParam) string {
 		if fileInfo.IsDir() {
 			continue
 		}
-		if !(filepath.Ext(fileInfo.Name()) == ".go") {
+		if filepath.Ext(fileInfo.Name()) != ".go" {
 			continue
 		}
 		path := filepath.Join(cfg.SourceRootPath, fileInfo.Name())

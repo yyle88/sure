@@ -6,15 +6,15 @@ require (
 	github.com/kr/pretty v0.3.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
-	github.com/yyle88/done v1.0.22
+	github.com/yyle88/done v1.0.24
 	github.com/yyle88/erero v1.0.19
 	github.com/yyle88/formatgo v1.0.23
-	github.com/yyle88/must v0.0.16
-	github.com/yyle88/printgo v1.0.3
-	github.com/yyle88/rese v0.0.4
+	github.com/yyle88/must v0.0.20
+	github.com/yyle88/printgo v1.0.5
+	github.com/yyle88/rese v0.0.8
 	github.com/yyle88/runpath v1.0.23
-	github.com/yyle88/syntaxgo v0.0.47
-	github.com/yyle88/tern v0.0.5
+	github.com/yyle88/syntaxgo v0.0.48
+	github.com/yyle88/tern v0.0.6
 	github.com/yyle88/zaplog v0.0.20
 	go.uber.org/zap v1.27.0
 )

@@ -68,7 +68,7 @@ func GenerateClasses(cfg *ClassGenConfig, objects ...interface{}) {
 	if cfg.OutputPath != "" {
 		done.Done(utils.WriteFile(cfg.OutputPath, newSource))
 	} else {
-		fmt.Println(newSource)
+		fmt.Println(string(newSource))
 	}
 	zaplog.LOG.Debug("gen_success")
 }
@@ -102,7 +102,7 @@ func GenerateClassWithErrorHandlingMode(cfg *ClassGenOptions, object interface{}
 		if fileInfo.IsDir() {
 			continue
 		}
-		if !(filepath.Ext(fileInfo.Name()) == ".go") {
+		if filepath.Ext(fileInfo.Name()) != ".go" {
 			continue
 		}
 		path := filepath.Join(cfg.SourceRootPath, fileInfo.Name())
