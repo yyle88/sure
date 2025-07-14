@@ -66,7 +66,7 @@ func GenerateClasses(cfg *ClassGenConfig, objects ...interface{}) {
 	duration := time.Since(sinceTime)
 	zaplog.LOG.Debug("gen", zap.Duration("format_cost_duration", duration))
 	if cfg.OutputPath != "" {
-		done.Done(utils.WriteFile(cfg.OutputPath, newSource))
+		done.Done(os.WriteFile(cfg.OutputPath, newSource, 0644))
 	} else {
 		fmt.Println(string(newSource))
 	}

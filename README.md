@@ -76,6 +76,8 @@ If you find this package valuable, give me some stars on GitHub! Thank you!!!
 
 Give me stars. Thank you!!!
 
+---
+
 ## GitHub Stars
 
 [![starring](https://starchart.cc/yyle88/sure.svg?variant=adaptive)](https://starchart.cc/yyle88/sure)

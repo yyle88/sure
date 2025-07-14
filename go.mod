@@ -8,7 +8,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/yyle88/done v1.0.26
 	github.com/yyle88/erero v1.0.23
-	github.com/yyle88/formatgo v1.0.25
+	github.com/yyle88/formatgo v1.0.26
 	github.com/yyle88/must v0.0.25
 	github.com/yyle88/printgo v1.0.5
 	github.com/yyle88/rese v0.0.10

@@ -85,7 +85,7 @@ func GenerateStubs(config *StubGenConfig, stubParams ...*StubParam) {
 		} else { //推荐还是首先自己把文件建好，让程序能找到这个文件，再去重写它的内容
 			utils.MustFile(config.OutputPath) //规定目标是必须存在的
 		}
-		done.Done(utils.WriteFile(config.OutputPath, newSource))
+		done.Done(os.WriteFile(config.OutputPath, newSource, 0644))
 	} else {
 		fmt.Println(string(newSource))
 	}
